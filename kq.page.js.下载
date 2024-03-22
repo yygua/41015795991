@@ -1,0 +1,1057 @@
+/*tutial 
+
+kq.getTree 
+
+kq.uuid
+ 获取唯一性的值，一般不建议使用；有机率重复
+  
+kq.imgPath
+  kq.imgPath.CX
+ 
+kq.bdjz
+
+kq.bdjz.bdsetval
+	kq.bdjz.bdsetval("Model", wqhtxx);
+	
+ 
+kq.bdjz.easyui_kjyz
+kq.bdjz.easyui_qxkjyz
+kq.bdjz.setAreaReadonlyStatus
+kq.bdjz.clearAreaValue
+kq.bdjz.bdsetCheckBoxAndRadioDisable
+kq.bdjz.setEasyuiComponent
+
+kq.bdjz.setComboboxHasDefaultValue
+kq.bdjz.setComboboxAndSelectSpecialVal
+kq.bdjz.setComTree("HJSZSS", szsj.XZQH);
+
+*/
+
+var kq = kq || {};
+
+// 回到顶部
+var goTopBtn_mouseOver = function () {
+    $("#goTopBtn").css({ "background": "url(" + common.context + "/images/gotop2.png)" });
+};
+var goTopBtn_mouseOut = function () {
+    $("#goTopBtn").css({ "background": "url(" + common.context + "/images/gotop1.png)" });
+};
+
+$(function () {
+    $('body').append('<div id="goTopBtn" onmouseover="goTopBtn_mouseOver()" onmouseout="goTopBtn_mouseOut()"' +
+        'style="display:none; position:fixed;z-index:3000;width:30px;cursor:pointer; ' +
+        'height:30px; ' +
+        'background: url(' + common.context + '/images/gotop1.png)' +
+        '"></div>');
+    $("#goTopBtn").css("left", $(window).width() - 45);
+    $("#goTopBtn").css("top", $(window).height() - 40);
+    $(document).scroll(function () {
+        var sc = $(document).scrollTop();
+        var rwidth = $(document).width()
+        if (sc > 100) {
+            $("#goTopBtn").css("display", "block");
+        } else {
+            $("#goTopBtn").css("display", "none");
+        }
+    })
+    $("#goTopBtn").click(function () {
+        var sc = $(document).scrollTop();
+        $('body,html').animate({ scrollTop: 0 }, 500);
+    })
+
+});
+
+/**
+ * kq.ajax = function(serviceId, param, success, fail){ param = param || {};
+ * param = JSON.stringify(param); $.ajax({ type : "POST", url : kq.url, data :
+ * {"param": param, "serviceId" : serviceId}, success : function(data, status,
+ * jqXHR){ success(JSON.parse(data)); }, error : function(request, status, ex){
+ * if(!fail){ fail(textStatus); } } }); };
+ */
+
+kq.selectListByPage = function (serviceId, param, page, success, fail) {
+    param.page = page;
+    kq.ajax(serviceId, param, success, fail);
+};
+
+
+kq.selectByPage = function (serviceId, param, page, success, fail) {
+    param = param || {};
+    param = JSON2.stringify(param);
+    page = JSON2.stringify(page);
+    $.ajax({
+        type: "POST",
+        url: kq.url,
+        data: { "param": param, "page": page, "serviceId": serviceId },
+        success: function (data, status, jqXHR) {
+            success(JSON2.parse(data));
+        },
+        error: function (request, status, ex) {
+            if (fail != undefined && fail != null) {
+                if (!fail) {
+                    fail(textStatus);
+                }
+            }
+        }
+    });
+};
+
+
+
+
+
+kq.getDatagridEditorValues = function (datagrid) {
+    // 获取所有列名
+    var colunmFields = datagrid.datagrid("getColumnFields");
+
+    // 获取所有行
+    var rows = datagrid.datagrid("getRows");
+    var totalCount = datagrid.datagrid("getData").rows.length;
+
+    // 遍历所有的editor，获取数据存放到rows中
+    for (var i = 0; i < totalCount; i++) {
+        // 行编辑器
+        var row_editor = datagrid.datagrid("getEditors", i);
+        // 编辑器中的编辑框个数
+        var fieldCount = row_editor.length;
+        for (var j = 0; j < fieldCount; j++) {
+            // 具体的编辑器
+            var editor = row_editor[j];
+            // 编辑器的类型
+            var type = editor.type;
+            // target
+            var target = editor.target;
+            // 对应的字段
+            var field = editor.field;
+            // 存放编辑器中的值
+            var value = "";
+            // 如果是选择框，存放对应的文本值
+            var text = "";
+            if (type == "text" || type == "numberbox" || type == "validatebox") {
+                value = target.val();
+            } else if (type == "combobox") {
+                value = target.combobox("getValue");
+                text = target.combobox("getText");
+                rows[i]["_" + field + "_"] = text;
+            }
+            // 把编辑器中的值存放到rows中
+            rows[i][field] = value;
+        }
+    }
+    return rows;
+};
+
+
+
+
+
+
+/**
+ * 获取当前流水号(当前编号) args: ywlbid 业务类别ID，具体业务ID请参考workflow.js中的workflow.BS_TYPE
+ */
+kq.getDQBH = function (ywlbid) {
+    var serio = "";
+    $.ajax({
+        type: "POST",
+        url: kq.path.common + "/workflow/generateFlowNo.do",
+        dataType: "json",
+        async: false,
+        data: { "YWLBID": ywlbid },
+        success: function (data, status, jqXHR) {
+            if (data != null && data.DQBH != undefined) {
+                serio = data.DQBH;
+            }
+        },
+        complete: function (xhr, ts) {
+            if (xhr.getResponseHeader("sessionstatus") == "timeout") {
+                alert(kq.timeout_message);
+                window.parent.location.href = xhr.getResponseHeader("login");
+            }
+        }
+    });
+    return serio;
+};
+
+kq.uuid = function () {
+    function S4() {
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1).toLocaleUpperCase();
+    }
+    return (S4() + S4() + S4() + S4() + S4() + S4() + S4() + S4());
+};
+
+// 打开下载页面，map(url:地址 data:参数)
+kq.openDownload = function (map) {
+    // var tempForm = document.createElement("form");
+    // tempForm.method = "get";
+    // tempForm.action = map.url;
+    // tempForm.target = "newWin";
+    // var hideInput = document.createElement("input");
+    // hideInput.type = "hidden";
+    // hideInput.name = "Condition";
+    // hideInput.value = JSON2.stringify(map.data);
+    // tempForm.appendChild(hideInput);
+    // if (document.all) {
+    // tempForm.attachEvent("onsubmit", function () { }); //IE
+    // } else {
+    // var subObj = tempForm.addEventListener("submit", function () { }, false);
+    // //firefox
+    // }
+    // document.body.appendChild(tempForm);
+    // if (document.all) {
+    // tempForm.fireEvent("onsubmit");
+    // } else {
+    // tempForm.dispatchEvent(new Event("submit"));
+    // }
+    // tempForm.submit();
+    // document.body.removeChild(tempForm);
+
+    var form = $("<form>");
+    form.attr('style', 'display:none');
+    form.attr('target', 'newWin');
+    form.attr('method', 'get');
+    form.attr('action', map.url);
+    var hideInput = document.createElement("input");
+    hideInput.type = "hidden";
+    hideInput.name = "Condition";
+    hideInput.value = JSON2.stringify(map.data);
+    $('body').append(form);
+    form.append(hideInput);
+    form.submit();
+}
+
+kq.init();
+
+/**
+ * 业务校验 args: options {YWLBID : 业务类别编码, FWIDS: 房屋ID(多个用,分割), RETURNFUN:
+ * 回调函数data:true/false，YWID:(如果有必须传，比如编辑的时候校验)}无需再加弹出框
+ */
+kq.ywjy = function (options) {
+    $.ajax({
+        url: common.context + '/ywjy/YWJY.do',
+        type: 'POST',
+        data: { YWLBID: options.YWLBID, FWIDS: options.FWIDS, YWID: (options.YWID || "") },
+        cache: false,
+        dataType: 'json',
+        async: false,
+        success: function (data) {
+            if (data.BL) {
+                options.RETURNFUN(true);
+            }
+            else {
+                if (data.LX == "是") {
+                    kq.dialog.alert(data.MSG);
+                    options.RETURNFUN(false);
+                }
+                else {
+                    kq.confirm({
+                        content: data.MSG,
+                        title: "警告",
+                        yes: function (indexa) {
+                            layer.close(indexa);
+                            options.RETURNFUN(true);
+                        },
+                        cancel: function (indexb) {
+                            layer.close(indexb);
+                            options.RETURNFUN(false);
+                        }
+                    });
+                }
+            }
+        }
+    });
+};
+/**
+ * 新建商品房备案业务校验 args: options {YWLBID : 业务类别编码, FWIDS:
+ * 房屋ID(多个用,分割),YSORXS：预售还是现售（YS/XS），
+ * 回调函数data:true/false，YWID:(如果有必须传，比如编辑的时候校验)}无需再加弹出框
+ */
+kq.ywjy_wqba = function (options) {
+    $.ajax({
+        url: common.context + '/ywjy/YWJY_WQBA.do',
+        type: 'POST',
+        data: { YWLBID: options.YWLBID, FWIDS: options.FWIDS, YSORXS: options.YSORXS, YWID: (options.YWID || "") },
+        cache: false,
+        dataType: 'json',
+        async: false,
+        success: function (data) {
+            if (data.BL) {
+                options.RETURNFUN(true);
+            }
+            else {
+                if (data.LX == "是") {
+                    kq.dialog.alert(data.MSG);
+                    options.RETURNFUN(false);
+                }
+                else {
+                    kq.confirm({
+                        content: data.MSG,
+                        title: "警告",
+                        yes: function (indexa) {
+                            layer.close(indexa);
+                            options.RETURNFUN(true);
+                        },
+                        cancel: function (indexb) {
+                            layer.close(indexb);
+                            options.RETURNFUN(false);
+                        }
+                    });
+                }
+            }
+        }
+    });
+};
+
+/**
+ * 查封校验 args: options {YWID : 业务ID, FWIDS: 房屋ID(多个用,分割), RETURNFUN:
+ * 回调函数data:true/false}
+ */
+kq.ywjy_cf = function (options) {
+
+    // 如果是楼盘授权不校验
+    if (options.YWID.substr(0, 2) == "12") {
+        options.RETURNFUN(true);
+        return;
+    }
+
+    $.ajax({
+        url: common.context + '/ywjy/YWJY_CF.do',
+        type: 'POST',
+        data: { FWIDS: options.FWIDS.toString(), YWID: (options.YWID || "") },
+        cache: false,
+        dataType: 'json',
+        async: false,
+        success: function (data) {
+            if (data.BL) {
+                options.RETURNFUN(true);
+            }
+            else {
+                if (data.LX == "是") {
+                    kq.dialog.alert(data.MSG);
+                    options.RETURNFUN(false);
+                }
+            }
+        }
+    });
+};
+
+
+// ***************************************************************************************************************
+// ********************************************** kq.Dom
+// *********************************************************
+// ***************************************************************************************************************
+kq.Dom = {
+    /**
+	 * 构建相应的html-tag对象,,注意不是相应的html-tag文本; jQuery要求1.8.0+
+	 * 
+	 * @param tag :
+	 *            对应的html tag 诸如:div,input等
+	 * @param props :
+	 *            属性组成的对象字面量
+	 * @author lq
+	 */
+    createDom: function (tag, props) {
+        return $("<" + tag + "/>", props).get(0);
+    },
+
+    /**
+	 * 构建相应的html-tag文本; jQuery要求1.8.0+
+	 * 
+	 * @param tag :
+	 *            对应的html tag 诸如:<div/>,<input/>等
+	 * @param props :
+	 *            属性组成的对象字面量
+	 * 
+	 * @example : lq.createHTMLTxt("<span/>",{'text':val,'style':"text-align:left;width:
+	 *          100%;"})
+	 * @example : 得到的是: "<span style="text-align:left;width: 100%;">123456</span>"
+	 * 
+	 * @author lq
+	 */
+    createHTMLTxt: function (tag, props) {
+        var htmTagObj = kq.Dom.createDom(tag, props);
+        return htmTagObj.outerHTML;
+    }
+};
+
+// ***************************************************************************************************************
+// ********************************************* kq.imgPath
+// ******************************************************
+// ***************************************************************************************************************
+(function _init_imgPath($, kq, win) {
+    if (kq.imgPath === undefined) {
+        kq.imgPath = {};
+    }
+    var imgPath = kq.imgPath;
+
+    // ********************************************************************
+    // *********************** EasyUI Image *******************************
+    // ********************************************************************
+
+    var BASE_PATH = common.context + "/js/jquery-easyui-1.3.6/themes/icons/";
+    // 删除
+    imgPath.SC = BASE_PATH + "delete.png";
+    // 删除2
+    imgPath.SC2 = BASE_PATH + "edit_remove.png";
+    // 编辑
+    imgPath.BJ = BASE_PATH + "pencil.png";
+    // 查看
+    imgPath.CK = BASE_PATH + "page_white_text.png";
+    // 查看楼盘
+    imgPath.CKLP = BASE_PATH + "lpxm.png";
+    // 查看附件
+    imgPath.CKFJ = BASE_PATH + "attach.png";
+
+    // 添加
+    imgPath.ADD = BASE_PATH + "edit_add.png";
+
+    // 提交
+    imgPath.TJ = BASE_PATH + "sign-in.png";
+    // 撤回
+    imgPath.CH = BASE_PATH + "sign-out.png";
+
+    // 下载
+    imgPath.XZ = BASE_PATH + "application_downlaod.png";
+
+    // 打印
+    imgPath.DY = BASE_PATH + "print.png";
+
+    // 查看合同
+    imgPath.CKHT = BASE_PATH + "magnifier.png";
+
+    // 生成合同
+    imgPath.SCHT = BASE_PATH + "printer.png";
+
+    imgPath.SHARE = BASE_PATH + "share.png";
+
+    imgPath.OK = BASE_PATH + "ok.png";
+
+}(jQuery, kq, window));
+
+// ***************************************************************************************************************
+// ********************************************* kq.msg
+// **********************************************************
+// ***************************************************************************************************************
+/*
+ * 暂未使用 (function _init_message($, kq, win) { if (kq.msg === undefined) { kq.msg =
+ * {}; } var msg = kq.msg;
+ * 
+ * msg.CKLCT = "查看流程图"; msg.GLFW = "关联房屋";
+ * 
+ * }(jQuery, kq, window))
+ */
+
+
+
+
+// ***************************************************************************************************************
+// ********************************************** kq.bdjz
+// ********************************************************
+// ***************************************************************************************************************
+kq.bdjz = {
+    loadMsgText: kq.loadMsg,
+    basePath: ''
+};
+kq.bdjz.ymload = function (msg) {
+    $("<div class=\"datagrid-mask\"></div>").css({ display: "block", width: "100%", height: $(window).height() }).appendTo("body");
+    $("<div class=\"datagrid-mask-msg\"></div>").html(msg).appendTo("body").css({ display: "block", left: ($(document.body).outerWidth(true) - 190) / 2, top: ($(window).height() - 45) / 2 });
+};
+kq.bdjz.ymdisLoad = function () {
+    $(".datagrid-mask").remove();
+    $(".datagrid-mask-msg").remove();
+};
+
+
+
+
+// 表单批量赋值:kq.bdjz.bdsetval(modelName,SJ),SJ:{a:1,b:2}
+// idOfArea:指定范围的id
+kq.bdjz.bdsetval = function (modelName, SJ, idOfArea, addTitleFlag) {
+    var $area = (idOfArea == undefined) ? $(document) : $("#" + idOfArea);
+
+    var tagArray = $area.find("[name^=" + modelName + "]");
+    var len = tagArray.length;
+    for (var i = 0; i < len; i++) {
+        var tagObj = tagArray[i];
+        var tagName = tagObj.tagName;
+        var id = $(tagObj).attr("name").replace(modelName + ".", "");
+        var dqkj = $("#" + id);
+        if (dqkj && dqkj[0]) {
+            var className = dqkj[0].className;
+            var valz = eval("SJ." + id);
+            if (className != null) {
+                if (className.indexOf("combobox-f") >= 0 && className.indexOf("combotree-f") < 0 && className.indexOf("datebox-f") < 0) {
+                    dqkj.combobox('setValue', valz); 
+                }
+                else if (className.indexOf("combotree-f") >= 0) {
+                    dqkj.combotree('setValue', valz);
+                }
+                else if (className.indexOf("datebox-f") >= 0) {
+                    dqkj.datebox('setValue', valz);
+                }
+                else if (className.indexOf("datetimebox-f") >= 0) {
+                    dqkj.datetimebox('setValue', valz);
+                }
+                else {
+                    if (dqkj.is("span")) {
+                        dqkj.text(valz);
+                    } else {
+                        dqkj.val(valz);
+                    }
+                    addTitleFlag && (dqkj.attr('title', valz));
+                }
+            } else if (tagName == "TEXTAREA") {
+                tagObj.value = dataValue;
+            } else { // hidden元素
+                if (dqkj.is(":hidden")) {
+                    dqkj.val(valz);
+                }
+            }
+        }
+    }
+};
+
+// 表单批量清空:kq.bdjz.bdsetnull(modelName)
+kq.bdjz.bdsetnull = function (modelName) {
+    var tagArray = $("[name^=" + modelName + "]");
+    var len = tagArray.length;
+    for (var i = 0; i < len; i++) {
+        var tagObj = tagArray[i];
+        var id = tagObj.name.replace(modelName + ".", "");
+        var dqkj = $("#" + id);
+        if (dqkj && dqkj[0]) {
+            var className = dqkj[0].className;
+            if (className != null) {
+                if (className.indexOf("combobox-f") >= 0 && className.indexOf("combotree-f") < 0 && className.indexOf("datebox-f") < 0) {
+                    dqkj.combobox('setValue', "");
+                }
+                else if (className.indexOf("combotree-f") >= 0) {
+                    dqkj.combotree('setValue', "");
+                }
+                else if (className.indexOf("datebox-f") >= 0) {
+                    dqkj.datebox('setValue', "");
+                }
+                else if (className.indexOf("datetimebox-f") >= 0) {
+                    dqkj.datetimebox('setValue', "");
+                }
+                else {
+                    dqkj.val("");
+                }
+            }
+        }
+    }
+};
+
+// easyui控件批量添加表单验证(下拉框，日期框等)ids:a,b,c
+kq.bdjz.easyui_kjyz = function (ids) {
+    var checked = null;
+    ids = ids.split(',');
+    for (var i = 0; i < ids.length; i++) {
+        $("#" + ids[i]).next().children(":first").attr("datatype", "*");// *验证不能为空
+    }
+    // 点击控件即获取对应name的元素对象
+    $(".combo").click(function () {
+        checked = null;
+        checked = $(this).children(":first");
+    })
+
+    // 点击日期控件时，点击月份不执行，必须点击day则执行
+    $(".calendar-body").on("click", function (e) {
+        if ($(this).parent() && $(this).parent().parent() &&
+            $(this).parent().parent().parent() &&
+            $(this).parent().parent().parent().html().indexOf("确定") > 0) {
+            return;
+        }
+        var className = $(e.target).attr("class");
+        if (className.indexOf("calendar-menu-month") == -1) {
+            checked.css("background-color", "#FFFFFF");
+        }
+    })
+    // 点击下面的今天执行，下面的关闭不执行
+    $(".datebox-button table tbody tr").children(":first").children(":first").click(function () {
+        if ($(this).html() == "今天") {
+            checked.css("background-color", "#FFFFFF");
+        }
+    });
+    $(".datebox-button table tbody tr").children(":first").next().children(":first").click(function () {
+        if ($(this).html() == "确定") {
+            checked.css("background-color", "#FFFFFF");
+        }
+    });
+    // combobox控件点击则执行
+    $(".combobox-item").click(function () {
+        checked.css("background-color", "#FFFFFF");
+    })
+    // tree控件
+    $(".tree-node").click(function () {
+        checked.css("background-color", "#FFFFFF");
+    })
+
+};
+
+// easyui控件批量取消表单验证(下拉框，日期框等)ids:a,b,c
+kq.bdjz.easyui_qxkjyz = function (ids) {
+    ids = ids.split(',');
+    for (var i = 0; i < ids.length; i++) {
+        $("#" + ids[i]).next().children(":first").removeAttr("datatype");
+    }
+};
+
+// 批量设置控件只读(下拉框和日期控件单独控制)
+kq.bdjz.bdsetreadonly = function (modelName) {
+    kq.bdjz.setAreaReadonlyStatus(modelName, true);
+};
+
+// 将指定区域内的元素全部readonly化
+// modelName : Model Name
+// status : true OR false
+// idOfArea : 指定区域的id值,,不指定的话则是document范围
+kq.bdjz.setAreaReadonlyStatus = function (modelName, status, idOfArea) {
+    var $area = (idOfArea == undefined) ? $(document) : $("#" + idOfArea);
+    status = (status == undefined) ? true : status;
+
+    // input component
+    $area.find("[name^=" + modelName + "]").attr({ readonly: status });
+    // easyui component
+    kq.bdjz._operateEasyUIComponent(modelName, $area, { readonly: status });
+};
+// 将指定区域内的元素的值全部清空
+// modelName : Model Name
+// idOfArea : 指定区域的id值,,不指定的话则是document范围
+kq.bdjz.clearAreaValue = function (modelName, idOfArea) {
+    var $area = (idOfArea == undefined) ? $(document) : $("#" + idOfArea);
+
+    $area.find("[name^=" + modelName + "]").attr({ value: "" });
+    kq.bdjz._operateEasyUIComponent(modelName, $area, { clear: null });
+};
+
+/*
+ * operates : {clear:null,readonly:true,disable:null} ;值为null,则代表不设置参数
+ */
+kq.bdjz._operateEasyUIComponent = function (modelName, $area, operates) {
+    // easyui component
+    var easyuiClassNames = ["datebox-f", "combobox-f", "combotree-f", "combo-f"];
+    $area.find("[comboname^=" + modelName + "]").each(function () {
+        var classPropValue = $(this).attr("class");
+        if (classPropValue == null) {
+            return;
+        }
+        var classNames = classPropValue.split(" ");
+        if (classNames.length <= 1) {
+            return;
+        }
+        for (var i = 0; i < classNames.length; i++) {
+            var className = classNames[i];
+            if (easyuiClassNames.indexOf(className) !== -1) {
+                var methodName = className.split("-")[0];
+                for (var operate in operates) {
+                    if (operates[operate] === null) {
+                        $(this)[methodName](operate);
+                    } else {
+                        $(this)[methodName](operate, operates[operate]);
+                    }
+
+                }
+            }
+        }
+    });
+}
+
+kq.bdjz.bdsetCheckBoxAndRadioDisable = function (modelName) {
+    $(":radio[name^=" + modelName + "]").disable();
+    $(":checkbox[name^=" + modelName + "]").disable();
+};
+
+// 将指定区域内的easyui元素,目前只针对combo系列
+// modelName : Model Name
+// opt : {clear:null,readonly:true,disable:null}
+// ;前者是方法名,后者是设置的值;;值为null,则代表不设置参数;
+// idOfArea : 指定区域的id值,,不指定的话则是document范围
+/**/
+kq.bdjz.setEasyuiComponent = function (modelName, idOfArea, opt) {
+    var $area = (idOfArea == undefined) ? $(document) : $("#" + idOfArea);
+
+    kq.bdjz._operateEasyUIComponent(modelName, $area, opt);
+};
+
+
+// 批量设置控件的值为空
+kq.bdjz.clearValue = function (modelName) {
+    $("[name^=" + modelName + "]").attr("value", "");;
+};
+
+// 表单加载
+// 批量加载控件赋值
+kq.bdjz.setBox = function (json) {
+    var cData = [];
+    for (var i = 0; i < json.length; i++) {
+        if (json[i].LBBM) cData.push(json[i].LBBM); else cData.push(json[i].ID);
+    }
+    var Cache = kq.getCache(cData);
+    for (var i = 0; i < json.length; i++) {
+        var TYPE = json[i].TYPE;
+        var ID = json[i].ID;
+        var pData = "";
+        if (json[i].LBBM) pData = json[i].LBBM; else pData = json[i].ID;
+        var str$ = eval("kq.bdjz.set" + TYPE);
+        str$(ID);
+        if (TYPE == "Combobox") kq.bdjz.ComboboxValue(ID, pData, Cache);
+        if (TYPE == "ComTree") kq.bdjz.ComTreeValue(ID, pData, Cache);
+    }
+};
+kq.bdjz.ComboboxValue = function (ID, pData, Cache) {
+    var inputId$ = $("#" + ID);
+    var data$ = eval("Cache." + pData);
+    inputId$.combobox({
+        data: data$
+    });
+};
+kq.bdjz.ComTreeValue = function (ID, pData, Cache) {
+    var result = new Array();
+    for (var i = 0; i < eval("Cache." + pData).length; i++) {
+        var resultMap = eval("Cache." + pData)[i];
+        for (var j = 0; j < resultMap.children.length; j++) {
+            resultMap.children[j].childrens = resultMap.children[j].children;
+            resultMap.children[j].children = "";
+        }
+        result.push(resultMap);
+    }
+    var inputId$ = $("#" + ID);
+    var data$ = eval("Cache." + pData);
+    inputId$.combotree({
+        data: result
+        // data: data$
+    });
+};
+// text控件赋值
+kq.bdjz.settext = function (id) {
+    var curInput$ = $("#" + id);
+    if (curInput$) {
+        curInput$.css("width", (curInput$.parent().width()) + "px");
+        curInput$.css("height", "30px");
+    }
+};
+// datebox控件创建
+kq.bdjz.setDateInput = function (id) {
+    var curInput$ = $("#" + id);
+    if (curInput$) {
+        curInput$.datebox({
+            height: 30,
+            panelWidth: (curInput$.parent().width()),
+            width: (curInput$.parent().width()),
+            editable: false
+        });
+    }
+};
+
+
+
+// datetimebox控件创建
+kq.bdjz.setDateTimeInput = function (id) {
+    var curInput$ = $("#" + id);
+    if (curInput$) {
+        curInput$.datetimebox({
+            height: 30,
+            panelWidth: (curInput$.parent().width()),
+            width: (curInput$.parent().width()),
+            editable: false
+        });
+    }
+};
+
+// dateTimebox控件创建;默认当前时间
+kq.bdjz.setDateTimeInputHasDefaultValue = function (id) {
+    kq.bdjz.setDateTimeInput(id);
+    $("#" + id).datetimebox("setValue", _formatDate1(new Date()));
+
+    function _formatDate1(date) {
+        var day = date.getDate() > 9 ? date.getDate() : "0" + date.getDate();
+        var month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : "0"
+            + (date.getMonth() + 1);
+        var hor = date.getHours();
+        var min = date.getMinutes();
+        var sec = date.getSeconds();
+        return date.getFullYear() + '-' + month + '-' + day + " " + hor + ":" + min + ":" + sec;
+    }
+};
+
+
+// datebox控件创建;默认当前时间
+kq.bdjz.setDateInputHasDefaultValue = function (id) {
+    kq.bdjz.setDateInput(id);
+    $("#" + id).datebox("setValue", _formatDate(new Date()));
+
+    function _formatDate(date) {
+        var day = date.getDate() > 9 ? date.getDate() : "0" + date.getDate();
+        var month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : "0"
+            + (date.getMonth() + 1);
+        return date.getFullYear() + '-' + month + '-' + day;
+    }
+};
+// Combobox控件创建
+kq.bdjz.setCombobox = function (id, data, height, props) {
+    var curInput$ = $("#" + id);
+    if (curInput$) {
+        $combobox = curInput$.combobox({
+            width: (curInput$.parent().width()),
+            height: (height) ? height : 30,
+            editable: false,
+            data: data,
+            valueField: 'VAL',
+            textField: 'MC'
+        });
+
+        if (kq.assert.isDefined(props)) {
+            $.extend($combobox.combobox("options"), props);
+        }
+
+        return $combobox;
+    }
+};
+
+/* Combobox控件创建;默认选中第一个 */
+kq.bdjz.setComboboxHasDefaultValue = function (id, data) {
+    // kq.bdjz.setCombobox(id, data);
+    // $("#" + id).combobox("selectFirstItem");
+    kq.bdjz.setComboboxAndSelectSpecialVal(id, data);
+}
+
+/* Combobox控件创建;指定选择哪个,第三个参数可填入text或value,当不填入时则选中第一个 */
+kq.bdjz.setComboboxAndSelectSpecialVal = function (id, data, valOrTextSelected) {
+    var $combobox = kq.bdjz.setCombobox(id, data);
+
+    // 默认选择第一个
+    if (kq.assert.isNotDefined(valOrTextSelected)) {
+        $combobox.combobox("selectFirstItem");
+        return;
+    }
+
+    var options = $combobox.combobox("options");
+    var valueField = options.valueField;
+    var textField = options.textField;
+
+    var values = $.map(data, function (item, index) {
+        return item[valueField];
+    });
+    var texts = $.map(data, function (item, index) {
+        return item[textField];
+    })
+    var value = null;
+
+
+    if (values.indexOf(valOrTextSelected) >= 0) {
+        value = valOrTextSelected;
+    } else {// 输入的text,需要将其转换为val
+        var index = texts.indexOf(valOrTextSelected);
+        if (index >= 0) {
+            value = values[index];
+
+        }
+    }
+
+    $combobox.combobox("select", value);
+
+}
+
+// ComTree控件创建
+kq.bdjz.setComTree = function (id, data) {
+    var curInput$ = $("#" + id);
+    if (curInput$) {
+        curInput$.combotree({
+            width: (curInput$.parent().width()),
+            height: 30,
+            editable: false,
+            data: data
+        });
+    }
+
+    return curInput$;
+};
+
+// 异步ComboTree
+// id:id属性值;;;SJZDLBBM:数据字典类别编码;;;param:其它参数
+kq.bdjz.setAsyncComTree = function (id, SJZDLBBM, param) {
+    var $jq = $("#" + id),
+        h = (kq.assert.isNotEmpty(param) && kq.assert.isNotEmpty(param.height)) ? param.height : 30;
+    $jq.combotree({
+        width: ($jq.parent().width()),
+        height: h,
+        editable: false,
+        onBeforeLoad: function (node, data) {
+            if (null === node) {// 加载根节点
+                var tree = $jq.combotree("tree"),
+                    d = kq.getTree(SJZDLBBM);
+
+                tree.tree("loadData", d);
+            }
+        },
+        onLoadSuccess: function (node, data) {
+            // $('#HJSZSS').combotree('tree').tree("collapseAll");
+        },
+        onBeforeExpand: function (node, param) {
+            var tree = $jq.combotree("tree"),
+                d = kq.getTree(SJZDLBBM, node.id);
+            tree.tree("append", {
+                parent: node.target,
+                data: d
+            });
+        }
+    });
+};
+
+// 获取当前时间
+kq.bdjz.setTime = function () {
+    var d = new Date();
+    return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+};
+// 表单加载结束
+
+
+// 判断普通文本控件是否为空 是 true,否false (有值)
+kq.bdjz.isNullOrEmpty = function (id) {
+    if ($("#" + id)) {
+        if ($("#" + id).val()) {
+            return false;
+        }
+    }
+    return true;
+};
+// 判断下拉框选择值是否为空 是true 否false
+// id（组件id）
+kq.bdjz.isComboxNullOrEmpty = function (id) {
+    if ($("#" + id)) {
+        if ($("#" + id).combobox('getValue')) {
+            return false;
+        }
+    }
+    return true;
+};
+kq.bdjz.isComboxTreeNullOrEmpty = function (id) {
+    if ($("#" + id)) {
+        if ($("#" + id).combotree('getValue')) {
+            return false;
+        }
+    }
+    return true;
+};
+kq.bdjz.isDateBoxNullOrEmpty = function (id) {
+    if ($("#" + id)) {
+        if ($("#" + id).datebox('getValue')) {
+            return false;
+        }
+    }
+    return true;
+};
+
+
+// 项目调档kq.xmdd(fun) fun(data:{XMID:'',XMMC:''})
+kq.layer_xmdd = null;
+kq.xmddfun = null;
+kq.xmdd = function (fun) {
+    kq.xmddfun = fun;
+    kq.layer_xmdd = layer.open({
+        type: 2,
+        title: '选择项目',
+        shadeClose: true,
+        shade: 0.3,
+        skin: 'layui-layer-lan',
+        area: ['1000px', '550px'],
+        content: '../xmlp/xmdd.html'
+    });
+};
+kq.xmddwc = function (data) {
+    layer.close(kq.layer_xmdd);
+    kq.xmddfun(data);
+};
+
+
+// 关联主体信息
+// 调用方法：var data = kq.getGlztxx(Condition)
+// 返回值：data:{flag: true, ztjcId: "2a808444-f0aa-43c1-b22f-4269d184e258"}
+// 传入参数：Condition:{ZTXM:'', ZJHM:'',ZJLX:'',XB:'',GJ:'',LXDH:'',LXDZ:''}
+kq.getGlztxx = function (Condition) {
+    var da;
+    $.ajax({
+        url: common.context + '/ztxx/ZTXX.do',
+        type: 'POST',
+        data: Condition,
+        async: false,
+        dataType: "json",
+        success: function (data) {
+            da = data;
+            if (!data.flag) {
+                kq.dialog.alert(data.message);
+            }
+        }
+    });
+    return da;
+};
+
+
+// 查看楼盘右键事件
+kq.show_YJ = function () {
+    $("[name=HDIV]").mousedown(function (event, a) {
+        if (event.which == 3 || a == 'right') {
+            var hid = $(this)[0].id.replace("HDIV", "");
+            // 确保没有undefined错误.
+            window.top.xmgl = window.top.xmgl || {};
+            window.top.xmgl.Condition = window.top.xmgl.Condition || {};
+            window.top.xmgl.Condition.hid = hid;
+
+            var smartMenus = [];
+            smartMenus.push({
+                text: "查看户信息",
+                func: function () {
+                    window.top.layer.open({
+                        type: 2,
+                        title: '查看户信息',
+                        shadeClose: true,
+                        shade: 0.3,
+                        skin: 'layui-layer-lan',
+                        area: ['98%', '98%'],
+                        content: 'xmlp/hView.html'
+                    });
+                }
+            });
+
+            if (kq.getCurrentUser().USER_INFO.USER_TYPE == 1) {
+                smartMenus.push({
+                    text: "历史追溯",
+                    func: function () {
+                        window.top.lszsw = window.top.layer.open({
+                            type: 2,
+                            title: "历史追溯",
+                            scrollbar: true,
+                            shadeClose: false,
+                            shade: 0.3,
+                            area: ['85%', '85%'],
+                            skin: 'layui-layer-lan',
+                            content: "xmlp/lszs.html"
+                        });
+                    }
+                });
+            }
+
+
+            // if ($(this)[0].innerHTML.indexOf("zf.png") > 0) {
+            // smartMenus.push({
+            // text: "查看附房信息",
+            // func: function () {
+
+            // }
+            // });
+            // }
+            // if ($(this)[0].innerHTML.indexOf("ff.png") > 0) {
+            // smartMenus.push({
+            // text: "查看主房信息",
+            // func: function () {
+
+            // }
+            // });
+            // }
+            $.smartMenu.remove();
+            $(this).smartMenu(
+                [smartMenus]
+            );
+        }
+    });
+};

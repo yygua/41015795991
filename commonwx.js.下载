@@ -1,0 +1,46 @@
+var baseUrl;
+if (typeof window.location.origin === "undefined"){
+	baseUrl = window.location.protocol + "//" + window.location.host;
+}else{
+    baseUrl = window.location.origin;
+}
+var common = { 
+		context:baseUrl,
+		pathname : window.location.pathname,
+		pathNum : window.location.pathname.split('\/').length
+};
+common.context += common.pathname.indexOf('bigplatform-shell') !== -1 ? '/' + common.pathname.split("/")[1] : '';
+
+/*自定义图标*/
+JSLoader.loadStyleSheet(common.context + "/custom-icon-fonts/style.css");
+/*Jquery*/
+JSLoader.loadJavaScript(common.context + "/js/jquery/jquery-3.3.1.min.js");
+/*Json And Map工具*/
+JSLoader.loadJavaScript(common.context + "/js/json2.js");
+JSLoader.loadJavaScript(common.context + "/js/hashMap.js");
+/*wechatUI*/
+JSLoader.loadStyleSheet(common.context + "/css/view/weui.css");
+JSLoader.loadJavaScript(common.context + "/js/view/weui.min.js");
+JSLoader.loadJavaScript(common.context + "/js/view/jweixin-1.2.0.js");
+/*扩展样式*/
+/*JSLoader.loadStyleSheet(common.context + "/css/view/show.css");*/
+/*kanq工具集*/
+JSLoader.loadJavaScript(common.context + "/js/kq.js");
+JSLoader.loadJavaScript(common.context + "/js/kq.constants.js");
+JSLoader.loadJavaScript(common.context + "/js/kqwx.js");
+JSLoader.loadJavaScript(common.context + "/js/kqWXViewConfig.js");
+/*Angular*/
+JSLoader.loadJavaScript(common.context + "/js/angular/angular.js");
+JSLoader.loadJavaScript(common.context + "/js/angular/angular-route.js");
+/*bootstrap*/
+JSLoader.loadStyleSheet(common.context + "/js/bootstrap/css/bootstrap.min.css");
+JSLoader.loadJavaScript(common.context + "/js/bootstrap/js/bootstrap.min.js");
+JSLoader.loadJavaScript(common.context + "/js/view/ui-bootstrap-tpls.js");
+
+JSLoader.loadJavaScript(common.context + "/js/jquery/extensions/jquery.extend.js");
+JSLoader.loadStyleSheet(common.context + "/js/layui/css/layui.css");
+JSLoader.loadJavaScript(common.context + "/js/layui/layui.js");
+JSLoader.loadJavaScript(common.context + "/js/layer/layer.js");
+JSLoader.loadJavaScript(common.context + "/js/layer/extensions/layer.extend.js");
+
+

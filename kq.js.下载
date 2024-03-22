@@ -1,0 +1,2161 @@
+/**
+ * 
+ * ------------------------------------------- assert断言 ----------------------------------------------------
+ * kq.assert.isBoolean(g) 判断是否为boolean值
+ * isNumber、isString、isFunction、isArray、isObject、isDefined、isNotDefined、isEmpty、isNotEmpty
+ * 
+ * kq.assert.isPositiveInteger(number) 正则表达式判断是否为正整数
+ * 
+ * kq.checkSFZ(idcard) 验证身份证
+ *   
+ * ------------------------------------------- 远程请求 ----------------------------------------------------
+ * 
+ * kq.ajax(serviceId, param, success, fail, options)
+ *  发起AJAX请求，执行指定的serviceId ; 
+ *  默认同步 , 可在options对象中重写设置为异步{async : true ;}
+ * 
+ * kq.ajax_url(url, param, success, fail, options)
+ *  向指定的url发起AJAX请求 ; 默认同步 ;
+ * 
+ * kq.ajaxSubmit($obj, params)
+ *  发起ajaxSubmit请求的ajax对象
+ *  params : 
+ *      第三方框架jquery.form的$.ajaxSubmit方法的所有支持的参数 
+ *  
+ * ------------------------------------------- 公用请求 ----------------------------------------------------
+ * 
+ * kq.getUrlParam(name) 
+ *  获取请求参数; name为请求地址
+ * 
+ * kq.reload_url()
+ * 不携带地址栏中url的参数进行刷新 
+ * 
+ * kq.guid()
+ * 生成随机码 
+ * 
+ * kq.strFormat()
+ * C#样式的字符串格式化
+ *  exsample：
+ *      kq.strFormat("this is a {0}","test") => "this is a test" 
+ * 
+ * kq.formatSecond(totalSec)
+ *  秒数转为x天*时*分*秒
+ * 
+ * kq.GETXTCS(data)
+ *  获取系统参数
+ *  params:
+ *      data 参数对象 {CSMC : 参数名称}
+ *  return：
+ *      {CSGZ : 参数规则}
+ *  
+ * kq.getCache(codeArr)
+ *  获取数据字典中的对应sjjdlbbm
+ *  对应 com.kq.controller.common.ParameterCacheController中的getSjzdCache方法
+ *  params:
+ *      codeArr字典名称字符串数组
+ *  example:
+ *      var szsj = kq.getCache(["GYFS", "SQRSF"]); // {VAL:xx , NAME:yy} 
+ *  
+ * kq.logout (xhr, ts)
+ *  注销用户
+ * 
+ * kq.getCurrentUser()
+ *  获取当前登录用户
+ * 
+ * kq.getCurrentQY()
+ *  获取当前企业  
+ * 
+ * kq.getTree(SJZDLBBM, SJSJZDBM) 
+ *  获取指定数据字典编码下的字典列表
+ *  如果SJSJZDBM为空，则获取第一级的数据字典列表，否则获取父级为SJSJZDBM下的字典列表
+ *  params:
+ *      SJZDLBBM: 数据字典类别编码 SJSJZDBM: 上级数据字典编码
+ * 
+ * 
+ * kq.getTimePeriods(startPeriod, endPeriod, inter) 
+ *  根据传入的开始时间、结束时间、时间间隔, 获取时间分段数组 
+ *     startPeriod: 开始时间, 如 06:00
+ *     endPeriod: 结束时间, 如 12:00
+ *     inter: 分段间隔, 分钟为单位, 如 15 
+ * 
+ *  kq.filterTreeData(data, id, pid)
+ *   将列表数据转成树形结构
+ *      data:列表数据
+ *      id : 树形结构主键字段
+ *      pid: 树形结构上级字段
+ *      
+ * 
+ * 
+ * ------------------------------------------- 表单相关操作 ----------------------------------------------------
+ * 
+ * kq.bind (data)
+ *  把data中的数据绑定到控件中
+ *  params: 
+ *      data 数据对象 比如 
+ *  example：
+ *      kq.bind ({"name" : "zhangsan", "age" : "23"}) ;
+ *      对应控件：<input type="text" name="name" /> <input type="text" name="age" />
+ * 
+ * kq.bindData(modelName, dataObj)
+ *  把数据绑定到对象名称为modelName的控件上
+ *  params: 
+ *      modelName: 对象名称 dataObj: 数据对象
+ *  example：
+ *      kq.bindData("userModel", {"name" : "zhangsan", "age" : 34});
+ *      对应控件：<input type="text" name="userModel.name" /> <input type="text" name="userModel.age" />
+ * 
+ * kq.transferModel(modelName)
+ *  根据model名把表单中的数据转换为对象
+ *  params: 
+ *      modelName: 对象名称 
+ *  example： 
+ *      对应控件：<input type="text" name="userModel.name" /> <input type="text" name="userModel.age" />
+ *      kq.transferModel("userModel");
+ *   
+ * ------------------------------------------- layer 弹框相关 ----------------------------------------------------
+ * 
+ * kq.alert(options)
+ *  弹出提示框
+ *  params:
+ *      options: 配置对象; {content : "提示的内容", icon : "图标", callback : 回调函数}
+ *  icon:
+ *      图标; 0:警告 1:正确 2:错误 3:询问
+ * 
+ * kq.confirm(options) 
+ *  弹出确认框
+ *  params:
+ *      options: 配置对象; {content : 提示内容, yes: 确定的回调函数, cancel: 取消的回调函数}  
+ * 
+ * kq.verify_error(_item, error_msg)
+ * 表单验证错误弹出框，仿layui form的submit
+ * params:
+ *  _item：可以是一个jquery对象，也可以是一个数组，如：
+ *          kq.verify_error( [$(sender).find('[name="ZJHM"]'), $(o_sender).find('[name="ZJHM"]')] , type_msg + "列表存在相同证件号码。请检查数据！" );
+ * 
+ * 
+ * ------------------------------------------- 对话框相关 ----------------------------------------------------
+ * dialog.alert(msg, callback)
+ *  警告对话框; 调用了kq.alert; 默认了icon为0
+ * 
+ * dialog.success(msg, callback)
+ *  成功对话框; 调用了kq.alert; 默认了icon为1
+ * 
+ * dialog.fail(msg, callback)
+ *  失败对话框; 调用了kq.alert; 默认了icon为2
+ * 
+ * dialog.confirm(msg, yesCallback, cancelCallback)
+ *  确认对话框; 调用了kq.confirm; 
+ * 
+ * -------------------------- 预约、预申报类型数据处理 ------------------------------------
+ * 
+ * kq.handlerApplyBDCDJLX(data , opt)
+ *  data: 需要处理的数据
+ *  opt: 'addt1' -- 处理可以用来预约的类型   'addt2' -- 处理可以用来申请的类型
+ * 
+ */
+
+var kq = kq || {};
+kq = $.extend(kq, {
+    context: ""
+    , path: {}
+    , url: ""
+    , init: null
+    , pageSize: 25
+    , pageList: [10, 20, 25, 30, 40]
+    , loadMsg: "正在加载数据..."
+    , timeout_message: "登陆超时或者账号已被其他人登陆！"
+});
+
+kq.init = function () {
+    kq.url = common.context + "/controller/core/request.do";
+};
+
+kq.openDownload = function (map) {
+    var form = $("<form>");
+    form.attr('style', 'display:none');
+    form.attr('target', 'newWin');
+    form.attr('method', 'get');
+    form.attr('action', map.url);
+    var hideInput = document.createElement("input");
+    hideInput.type = "hidden";
+    hideInput.name = "Condition";
+    hideInput.value = JSON2.stringify(map.data);
+    $('body').append(form);
+    form.append(hideInput);
+    form.submit();
+}
+
+$(function () {
+    kq.init();
+    kq.getWebsiteLanguage();
+    kq.loadProperties();
+})
+kq.mobileRegex = /^1\d{10}$/;// /^(0|86|17951)?(13[0-9]|15[012356789]|17[0135678]|18[0-9]|14[579])[0-9]{8}$/g; //手机验证正则
+kq.mobilePhoneRegex = /((^1[3456789]\d{9}$)|^((\d{7,8})|(\d{4}|\d{3})-(\d{7,8})|(\d{4}|\d{3})-(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1})|(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1}))$)/; //手机号 座机号正则表达式
+kq.personNaemRegex = /^[\u4E00-\u9FA5\uf900-\ufa2d·s]{2,20}$/;
+kq.bdcdyhRegex = /^\d{12}[GJZ][ABCDEFGHWYX]\d{5}[FLQW]\d{8}$/;
+//kq.passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$/;
+kq.tyshxydm = /^[^_IOZSVa-z\W]{2}\d{6}[^_IOZSVa-z\W]{10}$/;
+kq.passwordRegex =/^(?![0-9]+$)(?![a-z]+$)(?![A-Z]+$)(?![0-9a-z]+$)(?![0-9A-Z]+$)(?!([^(0-9a-zA-Z)])+$)^.{8,16}$/;// 至少一个数字、至少一个大写字母、至少一个小写字母；字母+数字+下划线， 8-16位
+kq.urlRegex = /(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/;
+kq.countdown = 60; //获取验证码倒计时
+kq.zsqsn = 2012; //不动产权证书起始年份
+
+
+/*----------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------- 处理国际化问题 -----------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------*/
+kq.getWebsiteLanguage = function () {
+    if (jQuery.i18n) {
+        var language = kq.GETXTCS({ CSMC: 'language' });
+        if (!!!language) {
+            kq.i18nLanguage = sessionStorage.i18nLanguage || $.i18n.browserLang();
+        } else {
+            kq.i18nLanguage = language.CSGZ;
+        }
+    }
+}
+
+kq.GetQueryString = function(name){
+	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+    var r = window.location.search.substr(1).match(reg);
+    if(r!=null)return  unescape(r[2]); return null;
+}
+
+/* 加载资源文件 */
+kq.loadProperties = function (callback) {
+    if (jQuery.i18n && jQuery.i18n.properties) {
+        jQuery.i18n.properties({
+            name: 'strings'
+            , language: kq.i18nLanguage
+            , path: kq.path.base + 'js2/i18n/'
+            , mode: 'map'
+            , cache: false
+            , encoding: 'UTF-8'
+            // , callback: callback
+        })
+    } else {
+        jQuery.i18n = {
+            prop: function () { }
+            , map: {}
+        }
+    }
+}
+
+/* 资源文件加载成功之后的处理方法 */
+kq.loadPropertiesCallback = function () {
+
+    if (kq.i18nLanguage == 'en') {
+        $('body').addClass('language-en');
+    } else {
+        $('body').removeClass('language-en');
+    }
+
+    try {
+        //初始化页面元素
+        $('[data-i18n-placeholder]').each(function () {
+            var i18n_flag = $(this).data('i18n-placeholder');
+            $(this).attr('placeholder', $.i18n.prop(i18n_flag));
+        });
+
+        $('[data-i18n-title]').each(function () {
+            var i18n_flag = $(this).data('i18n-title');
+            $(this).attr('title', $.i18n.prop(i18n_flag));
+        });
+
+        $('[data-i18n-text]').each(function () { 	//如果text里面还有html需要过滤掉
+            var html = $(this).html()
+                , i18n_flag = $(this).data('i18n-text')
+                , i18n_text = $.i18n.prop(i18n_flag)
+                , reg = /<(.*)>/;
+            if (reg.test(html)) {
+                $(this).html(reg.exec(html)[0] + i18n_text);
+            } else {
+                $(this).html(i18n_text);
+            }
+        });
+
+        $('[data-i18n-value]').each(function () {
+            var i18n_flag = $(this).data('i18n-value');
+            $(this).val($.i18n.prop(i18n_flag));
+        });
+
+    } catch (ex) {
+        console.log("i18n写入完毕");
+    }
+}
+
+
+/*----------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------- 后台配置提示信息 -----------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------*/
+kq.alertModuleMsg = {
+    areaEmptyData: '暂未配置区域信息，请先前往【系统设置》区域管理】中配置<p class="layer-content-alertmsg">温馨提示：请按照省-市-区进行添加</p>'
+    , djlxEmptyData: '暂无业务类型！请前往【登记类型管理】进行配置'
+    , djlxGrEmptyData: '暂无可做个人登记申请的业务类型！请前往【登记申请（个人）管理】进行配置'
+}
+
+/**
+ * 工具条的禁用和启用（添加登记大类、添加分级目录、添加登记小类）
+ * selector: 取值参考 '#bindRegTypeBtn', '#bindRegTypeBtn, #bindRegTypeBtn2'
+ * opt: 取值: disabled禁用  enabled启用
+ */
+kq.addOrRemoveDisabled = function (selector, opt) {
+    function addDisabled(addSelector) {
+        $(addSelector).attr('disabled', true).addClass('disabled').find('.icon-add').html('+');
+    }
+    function delDisabled(delSelector) {
+        $(selector).removeAttr('disabled', true).removeClass('disabled').find('.icon-add').html('');
+    }
+
+    if (kq.assert.isNotEmpty(selector)) {
+        opt == 'disabled' ? (addDisabled(selector)) : (delDisabled(selector));    // 默认开启
+    }
+}
+
+
+/*----------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------- assert 断言 判断类型 -----------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------*/
+
+kq.assert = {
+    isBoolean: function (G) {
+        return (typeof G === "boolean");
+    },
+    // 判断字符串是否由数字组成,则使用RegexHelper的digitMatch
+    // 或使用isFinite
+    isNumber: function (G) {
+        return (typeof G === "number" && isFinite(G));
+    },
+    isString: function (G) {
+        return (typeof G === "string" || G.constructor == String);
+    },
+    isFunction: function (G) {
+        var A = {};
+        return (A.toString.apply(G) === A.toString.apply(Function));
+    },
+    isArray: function (G) {
+        return Object.prototype.toString.call(G) === "[object Array]";
+    },
+    isObject: function (G) {
+        return (G && (typeof G === "object" || this.isFunction(G)) || false);
+    },
+    isDefined: function (v) {
+        return typeof v !== 'undefined';
+    },
+    isNotDefined: function (v) {
+        return (!kq.assert.isDefined(v));
+    },
+    /* 无法判断对象或数组为空,可以用来判断变量是否为空 */
+    isEmpty: function (v, allowBlank) {
+        return v === null || v === undefined || ((kq.assert.isArray(v) && !v.length)) || (!allowBlank ? v === '' : false);
+    },
+    isNotEmpty: function (v, allowBlank) {
+        return !kq.assert.isEmpty(v, allowBlank);
+    }
+    , isPositiveInteger: function (v) {
+        return /(^[1-9]\d*$)/.test(v)
+    }
+};
+
+/* 验证身份证（15位或18位） */
+kq.sfzhW = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];
+kq.sfzhProv = { 11: "北京", 12: "天津", 13: "河北", 14: "山西", 15: "内蒙", 21: "辽宁", 22: "吉林", 23: "黑龙", 31: "上海", 32: "江苏", 33: "浙江", 34: "安徽", 35: "福建", 36: "江西", 37: "山东", 41: "河南", 42: "湖北", 43: "湖南", 44: "广东", 45: "广西", 46: "海南", 50: "重庆", 51: "四川", 52: "贵州", 53: "云南", 54: "西藏", 61: "陕西", 62: "甘肃", 63: "青海", 64: "宁夏", 65: "新疆", 71: "台湾", 81: "香港", 82: "澳门", 91: "国外" };
+kq.checkSFZ = function (id) {
+    if (!!!id || (id.length != 18 && id.length != 15)) {
+        return false;
+    } else {
+        var xc = "10X98765432";
+        var num = 0;
+        if (id.length == 15) {
+            if (/^\d{15}$/.test(id)) {  // 转18位
+                id = id.substring(0, 6) + "19" + id.substring(6, 15);
+                if (/^(\d){17}$/.test(id)) {
+                    for (var i = 0; i < 17; i++) {
+                        num += kq.sfzhW[i] * (id.charAt(i) - '0');
+                    }
+                    id = id + xc.charAt(num % 11);
+                } else {
+                    return false;
+                }
+            }
+        }
+        if (!/^(\d){17}([\d|X])$/.test(id)) {
+            return false
+        }
+        if (kq.sfzhProv[parseInt(id.substr(0, 2))] == null) { // 地区错误
+            return false
+        }
+        var h = new Date(id.substr(6, 4) + "/" + id.substr(10, 2) + "/" + id.substr(12, 2));	//出生日期
+        if (!!!h.getDate()) {
+            return false
+        }
+        num = 0;
+        for (var i = 0; i < 17; i++) {
+            var ccc = id.charAt(i);
+            num += kq.sfzhW[i] * (id.charAt(i) - '0');
+        }
+        num = num % 11;
+        if (xc.charAt(num) != id.charAt(17)) {
+            return false
+        }
+        return true
+    }
+}
+
+/*----------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------- 远程请求 -----------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------*/
+
+$(function _remote_request($, win) {
+
+    /**
+     *  默认error函数 
+     *  注：与 jeasyui.datagrid.js 覆盖的 onLoadError重复了 !!!
+     * 
+     *  this; 调用本次AJAX请求时传递的options参数
+     *  request: XMLHttpRequest 对象
+     *  textStatus :错误信息、 除了得到null之外，还可能是"timeout", "error","notmodified" 和 "parsererror"
+     *  errorThrown: :（可选）捕获的异常对象
+     * 
+     *  通常 textStatus 和 errorThrown 之中只有一个会包含信息
+     */
+    var defaultErrorFunc = function (request, status, ex) {
+        if (kq.assert.isEmpty(request.responseText)) {
+            //alert("未知错误, 错误信息为: [ " + ex + " ]");//微信公众平台端点击功能时快速返回会倒是提示弹出十分不和谐，暂时注掉
+            return;
+        }
+
+        var rv = JSON2.parse(request.responseText);     //  {code: 1, data: "/common/page/login.html", msg: "fail"}
+        switch (rv.code) {
+            case -1:  // NO_LOGIN
+            case -2:  // NO_PERMISSION
+                // 当前页面不属于登录界面时
+                if (window.top.location.href.indexOf(rv.data) < 0) {
+                    window.top.location.href = common.context + rv.data;
+                }
+                break;
+            default:
+                alert("未知错误, 错误码为: [ " + rv.code + " ]");
+                break;
+        }
+    };
+
+    kq._defaultErrorFunc = defaultErrorFunc;
+
+    /**
+     * 向指定的url发起AJAX请求
+     * 默认同步 , 可在options对象中重写设置为异步{async : true ;}
+     */
+    kq.ajax = function (serviceId, param, success, fail, options) {
+        var queryParam = param || {}
+            , op = options || { async: false };
+        queryParam.serviceId = serviceId;
+
+        var params = {
+            type: "POST"
+            , url: kq.url
+            , dataType: "JSON"
+            , cache: false
+            , async: op.async
+            , data: queryParam
+            , success: success
+            , fail: fail
+        };
+
+        kq._doAjax(params);
+    };
+
+    /**
+     * ajax请求; 默认是同步的, 可以显式设置为异步; async : true ;
+     * 默认同步 , 可在options对象中重写设置为异步{async : true ;}
+     */
+    kq.ajax_url = function (url, param, success, fail, options) {
+        var queryParam = param || {}
+            , op = options || { async: false };
+        if (kq.assert.isEmpty(op.async)) {
+            op.async = false;
+        }
+
+        var params = {
+            type: "POST"
+            , url: url
+            , dataType: "JSON"
+            , cache: false
+            , async: op.async
+            , data: queryParam
+            , success: success
+            , fail: fail
+        };
+
+        kq._doAjax(params);
+
+    };
+
+    /**
+     * ajax请求; 默认是同步的, 可以显式设置为异步; async : true ; 
+     */
+    kq.ajax_html = function (url, param, success, fail, options) {
+        var queryParam = param || {}
+            , op = options || { async: false };
+        if (kq.assert.isEmpty(op.async)) {
+            op.async = false;
+        }
+        if ($.isEmptyObject(queryParam)) {
+            queryParam = null;
+        }
+        if (url.indexOf('?') != -1) {
+            url += '&_=201905131930'
+        } else {
+            url += '?_=201905131930'
+        }
+        var params = {
+            type: "GET"
+            , url: url
+            , dataType: "html"
+            , cache: true
+            , async: op.async
+            , data: queryParam
+            , success: success
+            , fail: fail
+        };
+
+        kq._doAjax(params);
+
+    };
+    kq.formatTime = function (time) {
+        var date = new Date(time);
+        var year = date.getFullYear(),
+            month = date.getMonth() + 1,//月份是从0开始的
+            day = date.getDate(),
+            hour = date.getHours(),
+            min = date.getMinutes();
+        var newTime = year + '-' +
+            (month < 10 ? '0' + month : month) + '-' +
+            (day < 10 ? '0' + day : day) + ' ' +
+            (hour < 10 ? '0' + hour : hour) + ':' +
+            (min < 10 ? '0' + min : min);
+
+        return newTime;
+    }
+    /**
+     * 发起ajaxSubmit请求的ajax对象
+     * params : 第三方框架jquery.form的$.ajaxSubmit方法的所有支持的参数
+     */
+    kq.ajaxSubmit = function ($obj, params) {
+        var customSuccessFunc = params.success
+            , customErrorFunc = params.error;
+        params.success = function (data) {
+            customSuccessFunc(this, arguments);
+        };
+        params.error = function (data) {
+            if (kq.assert.isNotEmpty(customErrorFunc)) {
+                customErrorFunc(this, arguments);
+                return;
+            }
+            defaultErrorFunc(this, arguments);
+        };
+        $obj.ajaxSubmit(params);
+    };
+
+    /**
+     * ajax 统一处理函数
+     */
+    kq._doAjax = function (params) {
+        var index_load = null,
+            defaultParams = {
+                success: function (data, status, jqXHR) {
+                    if (typeof data == String) {
+                        data = JSON2.parse(data);
+                    }
+                    params.success(data);
+                }
+                , error: function (request, status, ex) {
+                    if (kq.assert.isNotEmpty(params.fail)) {
+                        params.fail(status + ";" + ex);
+                    } else {
+                        defaultErrorFunc.apply(this, arguments);
+                    }
+                }
+            };
+
+        kq.lq.apply(defaultParams, params);
+
+        /* 解决重复请求问题 */
+        // var currentRequests = {};
+        // $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+        //     if (currentRequests[options.url]) { currentRequests[options.url].abort(); }
+        //     currentRequests[options.url] = jqXHR;
+        // });
+
+        $.ajax(defaultParams);
+    };
+
+}(jQuery, window));
+
+/*----------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------- 公用方法和请求 -----------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------*/
+
+/**
+ * 获取url参数 
+ */
+kq.getUrlParam = function (name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i"); // 构造一个含有目标参数的正则表达式对象
+    var r = window.location.search.substr(1).match(reg);  // 匹配目标参数
+    if (r != null) {
+        return unescape(r[2]);
+    }
+    return ""; // 返回参数值
+}
+
+/**
+ * 不携带地址栏中url的参数进行刷新
+ */
+kq.reload_url = function () {
+    if (window.location.href.indexOf("?") > 0) {
+        window.location.href = window.location.href.substring(0, window.location.href.indexOf("?"));
+    } else {
+        window.location.href = window.location.href;
+    }
+}
+
+/** 生成随机码 */
+kq.guid = function () {
+    return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+/**
+ * C#样式的字符串格式化
+ *  exsample：
+ *      kq.strFormat("this is a {0}","test") => "this is a test"
+ */
+kq.strFormat = function () {
+    if (arguments.length == 0)
+        return null;
+
+    var str = arguments[0];
+    for (var i = 1; i < arguments.length; i++) {
+        var re = new RegExp('\\{' + (i - 1) + '\\}', 'gm');
+        str = str.replace(re, arguments[i]);
+    }
+    return str;
+};
+
+
+/**
+ * 秒数转为x天*时*分*秒
+ */
+kq.formatSecond = function (totalSec) {
+    var symbol = "";
+    if (totalSec < 0) {
+        symbol = "-";
+        totalSec = Math.abs(totalSec);
+    }
+
+    var day = parseInt(totalSec / (24 * 60 * 60)) + "天"
+        , hour = parseInt(totalSec % (24 * 60 * 60) / (60 * 60)) + "小时"
+        , min = parseInt(totalSec % (24 * 60 * 60) % (60 * 60) / 60) + "分钟"
+        , sec = parseInt(totalSec % (24 * 60 * 60) % (60 * 60) % 60) + "秒"
+        , str = symbol + day + hour + min + sec;
+    return str;
+};
+
+/**
+ * 获取系统参数
+ *  params:
+ *      data 参数对象 {CSMC : 参数名称}
+ *  return：
+ *      {CSGZ : 参数规则}
+ */
+kq.GETXTCS = function (data) {
+    var rst = null;
+    kq.ajax_url(
+        kq.path.common + "XTCS/GETXTCS.do"
+        , data
+        , function (data) {
+            rst = data.data;
+        }
+    );
+    return rst;
+};
+
+
+/**
+ *  获取数据字典中的对应sjjdlbbm
+ *  对应 com.kq.controller.common.ParameterCacheController中的getSjzdCache方法
+ *  params:
+ *      codeArr字典名称字符串数组
+ *  example:
+ *      var szsj = kq.getCache(["GYFS", "SQRSF"]); // {VAL:xx , NAME:yy}
+ *      kq.bdjz.setComboboxHasDefaultValue('GYFS', szsj.GYFS);
+ */
+kq.getCache = function (codeArr) {
+    var result = null;
+    kq.ajax_url(
+        kq.path.common + "parameter/sjzd.do"
+        , {
+            "param": JSON2.stringify(codeArr)
+        }
+        , function (data, status, jqXHR) {
+            data = data.data;
+            if (typeof data == String) {
+                data = JSON2.parse(data);
+            }
+            result = data;
+        }
+    )
+    return result;
+};
+
+
+
+/**
+ * 注销用户
+ */
+kq.logout = function (xhr, ts) {
+    if (xhr.getResponseHeader("sessionstatus") == "timeout") {
+        alert(kq.timeout_message);
+        window.parent.location.href = xhr.getResponseHeader("login");
+    }
+};
+
+
+/**
+ * 获取当前用户信息
+ */
+kq.getCurrentUser = function () {
+    var rst = null;
+    if (window.top.kq.CurrentUser && !$.isEmptyObject(window.top.kq.CurrentUser)) {
+        return window.top.kq.CurrentUser;
+    }
+    kq.ajax_url(
+        kq.path.common + "getCurrentUser.do"
+        , {}
+        , function (data) {
+            rst = data.data;
+        }
+    );
+    window.top.kq.CurrentUser = rst;
+    return window.top.kq.CurrentUser;
+};
+
+
+/**
+ * 获取当前企业
+ */
+kq.getCurrentQY = function () {
+    var rst = null;
+    if (window.top.kq.CurrentQY) {
+        return window.top.kq.CurrentQY;
+    }
+    kq.ajax_url(
+        kq.path.common + "/getCurrentQY.do"
+        , {}
+        , function (data, status, jqXHR) {
+            rst = data;
+        }
+    )
+    window.top.kq.CurrentQY = rst;
+    return window.top.kq.CurrentQY;
+};
+
+
+/**
+ * 获取指定数据字典编码下的字典列表
+ * 如果SJSJZDBM为空，则获取第一级的数据字典列表，否则获取父级为SJSJZDBM下的字典列表
+ * params:
+ *      SJZDLBBM: 数据字典类别编码 SJSJZDBM: 上级数据字典编码
+ */
+kq.getTree = function (SJZDLBBM, SJSJZDBM) {
+    var param = {};
+    param.SJZDLBBM = SJZDLBBM;
+    if (SJSJZDBM != null && SJSJZDBM != undefined) {
+        param.SJSJZDBM = SJSJZDBM;
+    }
+
+    return kq._doGetTree(param);
+};
+
+kq._doGetTree = function (param) {
+    var result = null;
+    kq.ajax_url(
+        kq.path.common + "/parameter/listChildren.do"
+        , { "param": JSON2.stringify(param) }
+        , function (data, status, jqXHR) {
+            data = data.data;
+            if (typeof data == String) {
+                data = JSON2.parse(data);
+            }
+            result = data;
+        }
+    )
+    return result;
+}
+
+
+
+/** 
+ * 根据传入的开始时间、结束时间、时间间隔, 获取时间分段数组 
+ *  startPeriod: 开始时间, 如 06:00
+ *  endPeriod: 结束时间, 如 12:00
+ *  inter: 分段间隔, 分钟为单位, 如 15
+ */
+kq.getTimePeriods = function (startPeriod, endPeriod, inter) {
+    var startSecs = new Date('2017-01-01 ' + startPeriod).getTime()
+        , endSecs = new Date('2017-01-01 ' + endPeriod).getTime()
+        , inter = inter || 30
+        , interSecs = inter * 60 * 1000
+        , newSecs = startSecs
+        , periods = [startPeriod];
+    while (newSecs < endSecs && (newSecs + interSecs) < endSecs) {
+        newSecs += interSecs;
+        var newPeriod = $.formatDate(new Date(newSecs), 'hh:mm');
+        periods.push(newPeriod);
+    }
+    // 最后一个值判断
+    if ((endSecs - newSecs) < (interSecs * 2 / 3)) {
+        periods.pop();
+    }
+    periods.push(endPeriod);
+    return periods;
+}
+
+/** 
+ * 处理预约时段 ; 1分钟等于60秒 1秒等于1000毫秒
+ *  startPeriod: 开始时间, 如 06:00
+ *  endPeriod: 结束时间, 如 12:00
+ *  inter: 分段间隔, 分钟为单位, 如 15
+ */
+kq.processReservPeriod = function (startPeriod, endPeriod, inter, isAm) {
+    var periods = []
+        , result = []
+        , periodWord = isAm ? '上午' : '下午';
+    // 获取时间
+    if (inter > 1) {
+        periods = kq.getTimePeriods(startPeriod, endPeriod, inter);
+    } else {
+        periods = [startPeriod, endPeriod];
+    }
+    for (var i = 0, len = periods.length; i < len; i++) {
+        if (!!periods[i + 1]) {
+            var period = periods[i] + '-' + periods[i + 1];
+            result.push({ YYSJDS: periodWord, YYSJD: period });
+        }
+    }
+    return result;
+}
+
+/**
+ * 将列表数据转成树形结构 
+ * @param data          列表数据
+ * @param id      树形结构主键字段
+ * @param pid    树形结构上级字段
+ */
+kq.filterTreeData = function (data, id, pid) {
+    var pos = {}
+        , treeList = []
+        , i = 0
+        , whileindex = 0
+        , foreachsum = data.length;
+    function copy(item) {
+        var _temp = {
+            children: []
+        };
+        _temp[id] = item[id];
+        for (var _index in item) {
+            if (_index != id && _index != pid) {
+                _temp[_index] = item[_index];
+            }
+        }
+        return _temp;
+    }
+    while (data.length != 0) {
+        var treeitem = data[i];
+        if (!!!treeitem[pid]) { // 父节点
+            var _temp = copy(treeitem);
+            _temp.level = 1;
+            treeList.push(_temp);
+            pos[treeitem[id]] = [treeList.length - 1];
+            data.splice(i, 1);
+            i--;
+        } else {
+            var posArr = pos[treeitem[pid]];
+            if (posArr != undefined) {
+                var obj = treeList[posArr[0]];
+                for (var j = 1; j < posArr.length; j++) {
+                    obj = obj.children[posArr[j]];
+                }
+                var _temp = copy(treeitem);
+                _temp.level = posArr.length + 1;
+                obj.children.push(_temp);
+                pos[treeitem[id]] = posArr.concat([obj.children.length - 1]);
+                data.splice(i, 1);
+                i--;
+            }
+        }
+        i++;
+        whileindex++;
+        if (i > data.length - 1) {
+            i = 0;
+        }
+        if (whileindex >= foreachsum * foreachsum) {
+            data = [];
+        }
+    }
+    return treeList;
+}
+
+/**
+ * 数组对象排序方法 
+ * 参数：
+ * 		property : 排序参数，比较哪个参数
+ * 		isAsc： 是否是升序排序，默认为true
+ * 排序规则：
+ *      若 a 小于 b, 在排序后的数组中 a 应该出现在 b 之前, 则返回一个小于 0 的值
+ *      若 a 等于 b, 则返回 0
+ *      若 a 大于 b, 则返回一个大于 0 的值
+ * 
+ * 举例：数组对象 arr=[{id:1, d:1},{id:3, d:3},{id:2, d:2}]
+ * 	arr.sort(kq.compareArrayObj('d' , true))	// 表示数组arr按照参数d进行升序排序
+ */
+kq.compareArrayObj = function (property, isAsc) { //排序，返回值小于 0 ，那么 a 会被排列到 b 之前
+    isAsc = kq.assert.isEmpty(isAsc) ? true : isAsc;
+    return function (a, b) {
+        var reg = /\s|\-|\:/g
+            , val_a = ('' + (kq.assert.isNotEmpty(a[property]) ? a[property] : '')).replace(reg, '')
+            , val_b = ('' + (kq.assert.isNotEmpty(b[property]) ? b[property] : '')).replace(reg, '');
+        return isAsc ? (val_a - val_b) : (val_b - val_a);
+    }
+}
+
+
+/**
+ * easyui treegrid 获取当前编辑的祖先节点
+ */
+kq._getTreeGridPID = function (treeDOM, node) {
+    function _getPID(node) {
+        var pNode = null;
+        if (node._parentId == undefined && node.parent) {
+            node._parentId = node.parent.id;
+        }
+        pNode = treeDOM.treegrid('getParent', node.id);
+        if (pNode != null) {
+            return _getPID(pNode);
+        } else {
+            return node;
+        }
+    }
+    return _getPID(node);
+}
+
+kq.getAreaCodeData1 = function (param) {
+	var areaArrayData = [];
+	if (typeof (param) == 'undefined') {
+		param = {};
+	}
+	kq.ajax('COMMON_CMS_GET_AREA_TREE', param, function (data) {
+		areaArrayData = data.rows.sort(kq.compareArrayObj('PBH', true));
+	});
+
+	if ($.isEmptyObject(areaArrayData)) {
+		return {};
+	} else {
+		return kq.handlerWebsiteArea1(areaArrayData);
+	}
+}
+
+kq.handlerWebsiteArea1 = function (areaArrayData) {
+	var areaJSON = [];
+
+	// 省级
+	$.each(areaArrayData, function (index, item) {
+		if (kq.assert.isEmpty(item.PBH)) {
+			areaJSON.push({
+				id: item.BH,
+				text: item.MC
+			});
+			delete areaArrayData[index];
+		}
+	})
+
+	// 
+	function _doCityNode(arr) {
+		$.each(arr, function (i, elem) {
+			$.each(areaArrayData, function (index, item) {
+				if (kq.assert.isNotEmpty(item) && item.PBH == elem.id) {
+					arr[i].children = arr[i].children || [];
+					arr[i].children.push({
+						id: item.BH,
+						text: item.MC,
+						_parentId: arr[i].id
+					});
+					delete areaArrayData[index];
+					_doCityNode(arr[i].children);
+				}
+			})
+		})
+	}
+	_doCityNode(areaJSON);
+	return areaJSON;
+}
+/**
+ * 处理区域JSON数据
+ */
+kq.getAreaCodeData = function (param) {
+    var areaArrayData = [];
+    if (typeof (param) == 'undefined') {
+        param = {};
+    }
+    kq.ajax('COMMON_CMS_GET_AREA_TREE', param, function (data) {
+        areaArrayData = data.rows.sort(kq.compareArrayObj('PBH', true));
+    });
+
+    if ($.isEmptyObject(areaArrayData)) {
+        return {};
+    } else {
+        return kq.handlerWebsiteArea(areaArrayData);
+    }
+}
+
+kq.handlerWebsiteArea = function (areaArrayData) {
+    var areaJSON = {
+        province: []
+    };
+    // 省级
+    $.each(areaArrayData, function (index, item) {
+        if (kq.assert.isEmpty(item.PBH)) {
+            areaJSON.province.push({ code: item.BH, address: item.MC });
+            delete areaArrayData[index];
+        }
+    })
+
+    // 
+    function _doCityNode(arr) {
+        $.each(arr, function (i, elem) {
+            $.each(areaArrayData, function (index, item) {
+                if (kq.assert.isNotEmpty(item) && item.PBH == elem.code) {
+                    var code = item.BH;
+                    areaJSON[item.PBH] = areaJSON[item.PBH] || {};
+                    areaJSON[item.PBH][item.BH] = item.MC;
+                    delete areaArrayData[index];
+                    _doCityNode([{ code: code }]);
+                }
+            })
+        })
+    }
+    _doCityNode(areaJSON.province);
+    return areaJSON;
+}
+
+
+/*----------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------- 表单相关 -----------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------*/
+//表单批量清空:kq.bdsetnull(modelName)
+kq.bdsetnull = function (modelName) {
+    var tagArray = $("[name^=" + modelName + "]");
+    var len = tagArray.length;
+    for (var i = 0; i < len; i++) {
+        var tagObj = tagArray[i];
+        var id = tagObj.name.replace(modelName + ".", "");
+        var dqkj = $("#" + id);
+        if (dqkj && dqkj[0]) {
+            var className = dqkj[0].className;
+            if (className != null) {
+                if (className.indexOf("combobox-f") >= 0 && className.indexOf("combotree-f") < 0 && className.indexOf("datebox-f") < 0) {
+                    dqkj.combobox('setValue', "");
+                }
+                else if (className.indexOf("combotree-f") >= 0) {
+                    dqkj.combotree('setValue', "");
+                }
+                else if (className.indexOf("datebox-f") >= 0) {
+                    dqkj.datebox('setValue', "");
+                }
+                else if (className.indexOf("datetimebox-f") >= 0) {
+                    dqkj.datetimebox('setValue', "");
+                }
+                else {
+                    dqkj.val("");
+                }
+            }
+        }
+    }
+};
+/* 
+ * 把data中的数据绑定到控件中
+ * params: 
+ *      data 数据对象 比如 
+ * example：
+ *      kq.bind ({"name" : "zhangsan", "age" : "23"}) ;
+ *      对应控件：<input type="text" name="name" /> <input type="text" name="age" />
+*/
+kq.bind = function (data, context) {
+    context = context || document;
+    for (var key in data) {
+        var tagObjArray = $("[name=" + key + "]", context);
+
+        if (!!tagObjArray && tagObjArray.length == 1) {
+            var tagObj = tagObjArray[0]
+                , type = tagObj.type
+                , tagName = tagObj.tagName
+                , dataValue = data[key.toUpperCase()] || data[key.toLowerCase()] || data[key];
+            tagName = tagName.toUpperCase();
+
+            if (tagName == "INPUT") {
+                type = type.toUpperCase();
+                if (type == "TEXT" || type == "HIDDEN") {
+                    tagObj.value = dataValue;
+                }
+                if (type == "RADIO") {
+                    if (tagObj.value == dataValue) {
+                        tagObj.checked = true;
+                    }
+                }
+                if (type == "CHECKBOX") {
+                    for (var m = 0; m < dataValue.length; m++) {
+                        var chkValue = dataValue[m];
+                        if (tagObj.value == chkValue) {
+                            tagObj.checked = true;
+                        }
+                    }
+                }
+            } else if (tagName == "SELECT") {
+                var options = tagObj.options;
+                for (var i = 0, len = options.length; i < len; i++) {
+                    if (options[i].value == dataValue) {
+                        options[i].selected = true;
+                        break;
+                    }
+                }
+            } else if (tagName == "TEXTAREA") {
+                tagObj.value = dataValue;
+            }
+        }
+    }
+};
+
+
+/**
+ * 把数据绑定到对象名称为modelName的控件上
+ * params: 
+ *      modelName: 对象名称 dataObj: 数据对象
+ * example：
+ *      kq.bindData("userModel", {"name" : "zhangsan", "age" : 34});
+ *      对应控件：<input type="text" name="userModel.name" /> <input type="text" name="userModel.age" />
+ */
+kq.bindData = function (modelName, dataObj) {
+    var tagArray = $("[name^=" + modelName + "]");
+    for (var i = 0, len = tagArray.length; i < len; i++) {
+        var tagObj = tagArray[i]
+            , name = tagObj.name
+            , tagName = tagObj.tagName
+            , type = tagObj.type
+            , comboID = name.split('.')[1] || name;
+
+        if (name != undefined) {
+            var dataKey = name.substring(name.indexOf(".") + 1)
+                , dataValue = dataObj[dataKey.toUpperCase()] || dataObj[dataKey.toLowerCase()] || dataObj[dataKey];
+            if (dataValue == null || dataValue == undefined || dataValue == "") {
+                continue;
+            }
+            tagName = tagName.toUpperCase();
+            if (tagName == "INPUT") {
+                type = type.toUpperCase();
+                if (type == "TEXT" || type == "HIDDEN" || type == "NUMBER") {
+                    var comboObj = $("[id='" + name + "']");
+                    if (!!!comboObj.length) {
+                        comboObj = $('[name="' + name + '"]');
+                    }
+                    if (comboObj != null && comboObj != undefined && comboObj.length == 1) {
+                        var clazz = comboObj.attr("class");
+                        if (clazz == "combobox-f combo-f" || clazz == 'combo-value') {
+                            $('#' + comboID).combobox("select", dataValue);
+                        }
+                        if (clazz == "input1 datebox-f combo-f") {
+                            comboObj.datebox("setValue", dataValue);
+                        }
+                    }
+                    tagObj.value = dataValue;
+                }
+                if (type == "RADIO") {
+                    if (tagObj.value == dataValue) {
+                        tagObj.checked = true;
+                    }
+                }
+                if (type == "CHECKBOX") {
+                    for (var m = 0; m < dataValue.length; m++) {
+                        var chkValue = dataValue[m];
+                        if (tagObj.value == chkValue) {
+                            tagObj.checked = true;
+                        }
+                    }
+                }
+            } else if (tagName == "SELECT") {
+                var options = tagObj.options;
+                var slen = options.length;
+                for (var s = 0; s < slen; s++) {
+                    if (options[s].value == dataValue) {
+                        options[s].selected = true;
+                        break;
+                    }
+                }
+
+            } else if (tagName == "TEXTAREA") {
+                tagObj.value = dataValue;
+            }
+
+        }
+    }
+
+};
+
+
+/**
+ *  根据model名把表单中的数据转换为对象
+ *  params: 
+ *      modelName: 对象名称 
+ *  example： 
+ *      对应控件：<input type="text" name="userModel.name" /> <input type="text" name="userModel.age" />
+ *      kq.transferModel("userModel");
+ */
+kq.transferModel = function (modelName) {
+    var tagArray = $("[name^=" + modelName + "]")
+        , dataObj = {};
+    for (var i = 0, len = tagArray.length; i < len; i++) {
+        var tagObj = tagArray[i]
+            , name = tagObj.name
+            , tagName = tagObj.tagName
+            , type = tagObj.type;
+        if (name != undefined) {
+            var dataKey = name.substring(name.indexOf(".") + 1);
+            tagName = tagName.toUpperCase();
+            if (type == undefined) {
+                continue;
+            }
+            type = type.toUpperCase();
+            if (type == "TEXTAREA") {
+                dataObj[dataKey] = tagObj.value;
+            }
+            if (tagName == "SELECT") {
+                dataObj[dataKey] = tagObj.value;
+            }
+            if (tagName == "INPUT") {
+                if (type == "TEXT" || type == "HIDDEN" || type == "NUMBER" || type == "TEL") {
+                    dataObj[dataKey] = tagObj.value;
+                }
+                if (type == "RADIO") {
+                    if (tagObj.checked) {
+                        dataObj[dataKey] = tagObj.value;
+                    }
+                }
+                if (type == "CHECKBOX") {
+                    if (tagObj.checked) {
+                        if (dataObj[dataKey] != undefined && dataObj[dataKey] != null) {
+                            var chkArray = dataObj[dataKey];
+                            chkArray.push(tagObj.value);
+                            dataObj[dataKey] = chkValArray;
+                        } else {
+                            var chkValArray = [];
+                            chkValArray.push(tagObj.value);
+                            dataObj[dataKey] = chkValArray;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return dataObj;
+};
+
+
+/*----------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------- layer弹框相关 -----------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------*/
+
+/** 
+ *  弹出提示框
+ *  params:
+ *      options: 配置对象; {content : "提示的内容", icon : "图标", callback : 回调函数}
+ *  icon:
+ *      图标; 0:警告 1:正确 2:错误 3:询问
+ */
+kq.alert = function (options) {
+    var lay_op = {};
+    if (options.icon != undefined && options.icon != null) {
+        lay_op = { icon: options.icon, closeBtn: 0 }
+    }
+    else {
+        lay_op = { closeBtn: 0 }
+    }
+
+    if (kq.i18nLanguage == 'en') {
+        layer.open($.extend({
+            content: options.content
+            , title: 'Alert'
+            , btn: [$.i18n.prop('layer.btn_ok')]		// 确定 
+            , yes: function (idx) {
+                if (options.callback) {
+                    options.callback();
+                }
+                layer.close(idx);
+            }
+        }, lay_op));
+    } else {
+        layer.alert(
+            options.content
+            , lay_op
+            , function (idx) {
+                if (options.callback) {
+                    options.callback();
+                }
+                layer.close(idx);
+            }
+        );
+    }
+};
+
+
+
+/** 
+ *  弹出确认框
+ *  params:
+ *      options: 配置对象; {content : 提示内容, yes: 确定的回调函数, cancel: 取消的回调函数} 
+ */
+kq.confirm = function (options) {
+    if (kq.i18nLanguage == 'en') {
+        layer.open({
+            content: options.content
+            , title: 'confirm'
+            , icon: 3
+            , btn: [$.i18n.prop('layer.btn_ok'), $.i18n.prop('layer.btn_cancel')]		// 确定   取消   
+            , yes: function (idx) {
+                if (options.yes) {
+                    options.yes();
+                }
+                layer.close(idx);
+            }
+            , btn2: function (idx) {
+                if (options.cancel) {
+                    options.cancel();
+                }
+                layer.close(idx);
+            }
+        });
+    } else {
+        layer.confirm(
+            options.content
+            , { icon: 3, title: '提示' }
+            , function (idx) {
+                if (options.yes) {
+                    options.yes();
+                }
+                layer.close(idx);
+            }
+            , function (idx) {
+                if (options.cancel) {
+                    options.cancel();
+                }
+                layer.close(idx);
+            }
+        );
+    }
+};
+
+
+/** 
+ *  表单检验错误信息 
+ */
+kq.verify_effect = function (_dom) {
+    if (!!_dom) {
+        var d_type = $(_dom).prop("tagName").toUpperCase()
+            , item = $(_dom);
+
+        if (d_type == 'SELECT') {
+            item = $(_dom).next().find('.layui-unselect');
+        }
+        item.addClass('layui-form-danger focus').focus()
+    }
+};
+kq.verify_error = function (_item, error_msg) {
+    if (_item.length > 1) {
+        $.each(_item, function (i, item) {
+            kq.verify_effect($(item))
+        })
+    } else {
+        kq.verify_effect(_item)
+    }
+
+    layer.msg(error_msg, { icon: 5, shift: 6 }, function () {
+        $('.focus').removeClass('focus');
+    });
+
+    return false;
+};
+
+/*----------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------- 对话框相关 -----------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------*/
+
+(function _init_dialog($, kq, win) {
+    if (kq.dialog === undefined) {
+        kq.dialog = {};
+    }
+    var dialog = kq.dialog;
+
+    // 警告对话框
+    dialog.alert = function (msg, callback) {
+        kq.alert({
+            content: msg
+            , icon: 0
+            , callback: callback
+        });
+    }
+
+    // 成功对话框
+    dialog.success = function (msg, callback) {
+        kq.alert({
+            content: msg
+            , icon: 1
+            , callback: callback
+        });
+    }
+
+    // 失败对话框
+    dialog.fail = function (msg, callback) {
+        kq.alert({
+            content: msg
+            , icon: 2
+            , callback: callback
+        });
+    }
+
+    // 确认对话框
+    dialog.confirm = function (msg, yesCallback, cancelCallback) {
+        kq.confirm({
+            content: msg
+            , yes: yesCallback
+            , cancel: cancelCallback
+        });
+    }
+
+}(jQuery, kq, window));
+
+
+/*----------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------- kq.lq -----------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------*/
+(function _init_lq($, kq, win) {
+    if (kq.lq === undefined) {
+        kq.lq = {};
+    }
+    var lq = kq.lq;
+
+    /*
+	 * 空实现
+	 */
+    lq.emptyFn = function () {
+        // 仿 Ext.emptyFn
+    };
+
+    /*
+	 * 将 c 中属性复制到 o 中;已有的会被覆盖.
+	 * 
+	 * defaults : A different object that will also be applied for default
+	 * values
+	 */
+    lq.apply = function (o, c, defaults) {
+        // no "this" reference for friendly out of scope calls
+        if (defaults) {
+            lq.apply(o, defaults);
+        }
+        if (o && c && typeof c == 'object') {
+            for (var p in c) {
+                o[p] = c[p];
+            }
+        }
+        return o;
+    };
+
+    /* 将 c 中属性复制到 o 中;已存在于o中的属性不处理. */
+    lq.applyIf = function (o, c) {
+        if (o) {
+            for (var p in c) {
+                if (!kq.assert.isDefined(o[p])) {
+                    o[p] = c[p];
+                }
+            }
+        }
+        return o;
+    };
+
+    /*
+	 * 预处理,因为得到的opt可能是个JSON字符串,所以我们需要将其进行转换;;; opt = kq.lq.pretreat(opt);
+	 */
+    lq.pretreat = function (opt) {
+        if (kq.assert.isString(opt)) {
+            opt = JSON2.parse(opt);
+        }
+        return opt;
+    };
+
+    /**
+	 * 生成在datagrid中使用的Image的HTML文本.
+	 * 
+	 * @param opt.src : image的路径
+	 * @param opt.clickHandler : 点击图片时的处理函数
+	 * 
+	 * @example : lq.generateGridImgBtn([{src:'',clickHandler:''}]);
+	 * @example : 得到的是: "<img src='' onclick=''></img>"
+	 */
+    lq.generateGridImgBtn = function (opt) {
+        var src = opt.src,
+            clickHandler = opt.clickHandler;
+
+        var template = "<img src='{0}' onclick='{1}' style='cursor: pointer'/>";
+        return kq.strFormat(template, src, clickHandler);
+
+    };
+
+    /*
+	 * 生成在datagrid中 ‘操作’ 列 的HTMl文本. @param btnConfigs : Btn的配置信息列表
+	 * 其中的每个Btn的配置信息属性: 1. title: 按钮标题 2. clickHandler : 按钮点击时的响应事件处理函数
+	 * 
+	 */
+    lq.generateGridImgBtnList = function (btnConfigs) {
+        var template = "";
+        for (var index in btnConfigs) {
+            var btnConfig = btnConfigs[index];
+            template += kq.strFormat("<input type='button' onclick='{0}' value='{1}' class='btn btn-primarys btn-mini' {2}/>",
+                btnConfig.clickHandler,
+                btnConfig.title,
+                (index === "0" ? "" : " style='margin-left:5px;'")
+            );
+        }
+
+        return template;
+    }
+
+
+}(jQuery, kq, window));
+
+
+/*----------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------- easyui 级联勾选和取消勾选 -------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------*/
+(function _init_cascadechecked($, kq, win) {
+    // 获取勾选状态
+    function getTreeGridCheckFlag(id, checkFlag) {
+        var checkOpt = $('[node-id="' + id + '"] :checkbox[name="' + checkFlag + '"]').prop('checked');  // 当前节点的勾选状态
+        return checkOpt;
+    }
+
+    // 级联勾选
+    function cascadeCheckRow(data, currTreeGrid, idField, checkField) {
+        if (data.children && data.children.length) {
+            $.each(data.children, function (i, item) {
+                currTreeGrid.treegrid('select', item[idField]);
+                cascadeCheckRow(item, currTreeGrid, idField, checkField);     // 循环调用
+            })
+        }
+    }
+    function cascadeParentCheckRow(data, currTreeGrid, idField, checkField) {
+        // 若存在父级, 则判断父元素子节点是否都勾选了
+        if (data._parentId) {
+            var parentRow = currTreeGrid.treegrid('getParent', data[idField])
+                , childCheckFlag = null;
+            if (parentRow) {
+                childCheckFlag = parentRow.children.every(function (itemrow, index, array) {
+                    return getTreeGridCheckFlag(itemrow[idField], checkField);
+                })
+
+                if (childCheckFlag) {
+                    currTreeGrid.treegrid('select', parentRow[idField]);
+                }
+                cascadeParentCheckRow(parentRow, currTreeGrid, idField, checkField);
+            }
+        }
+    }
+
+    // 级联取消勾选
+    function cancelCascadeCheckRow(data, currTreeGrid, idField, checkField) {
+        // 级联取消子级的勾选
+        if (data.children && data.children.length) {
+            $.each(data.children, function (i, item) {
+                currTreeGrid.treegrid('unselect', item[idField]);
+                cancelCascadeCheckRow(item, currTreeGrid, idField, checkField);     // 循环调用
+            })
+        }
+    }
+    function cancelParentCheckRow(data, currTreeGrid, idField, checkField) {
+        // 若存在父级, 则取消父级的勾选
+        if (data._parentId) {
+            var parentRow = currTreeGrid.treegrid('getParent', data[idField]);
+            if (parentRow) {
+                currTreeGrid.treegrid('unselect', parentRow[idField]);
+                cancelParentCheckRow(parentRow, currTreeGrid, idField, checkField);      // 取消父节点的勾选
+            }
+        }
+    }
+
+    if (kq.cascadechecked === undefined) {
+        /**
+         * cascadeData: 当前节点数据 row
+         * idField: easyui treegrid定义的id标签 idField: "id"
+         * checkField: easyui treegrid定义的复选框标签 { field: 'ck', checkbox: true } 
+         * currTreeGrid: 当前操作的easyui treegrid
+         */
+        kq.cascadechecked = function (cascadeData, currTreeGrid, idField, checkField) {
+            try {
+                var checkOpt = null;
+                idField = idField || 'id';
+                checkField = checkField || 'ck';
+                checkOpt = getTreeGridCheckFlag(cascadeData[idField], checkField);  // 当前节点的勾选状态
+
+                if (checkOpt == true) {
+                    cascadeCheckRow(cascadeData, currTreeGrid, idField, checkField);
+                    cascadeParentCheckRow(cascadeData, currTreeGrid, idField, checkField);
+                }
+                else if (checkOpt == false) {
+                    cancelCascadeCheckRow(cascadeData, currTreeGrid, idField, checkField);   // 取消子级勾选
+                    cancelParentCheckRow(cascadeData, currTreeGrid, idField, checkField);           // 取消父节点的勾选
+                }
+            } catch (e) {
+                console.log('级联勾选失败：' + e)
+            }
+        }
+    }
+
+
+}(jQuery, kq, window));
+
+
+// 获取元素到文档区域的坐标 
+kq.getElemPosition = function (element) {
+    if (kq.assert.isEmpty(element) || $.isEmptyObject(element)) {
+        return { left: 0, top: 0 };
+    }
+    element = $(element)[0];
+    var actualLeft = element.offsetLeft,
+        actualTop = element.offsetTop,
+        current = element.offsetParent; // 取得元素的offsetParent 
+    // 一直循环直到根元素 
+    while (current !== null) {
+        actualLeft += current.offsetLeft;
+        actualTop += current.offsetTop;
+        current = current.offsetParent;
+    }
+    // 返回包含left、top坐标的对象 
+    return {
+        left: actualLeft,
+        top: actualTop
+    };
+}
+
+
+/**
+ * 文件下载：首先判断文件是否存在, 存在则进行下载（可自定义下载文件保存名称）
+ */
+kq.downLoadFile = function (relatePath, fileName, fileSuffix) {
+
+    kq.ajax_url(kq.path.checkPath, { path: relatePath }, function (isExist) {
+        if (kq.assert.isNotEmpty(isExist) && isExist.data === true) {
+            // 下载文件
+        	var dw_param = $.param({ fName: encodeURI(fileName), suffix: fileSuffix, fPath: relatePath });//中文要加密，不然google正常移动端会出现文件名中文乱码问题
+            var downFileSrc = kq.path.downFile + dw_param;
+            var link = document.createElement('a');
+            link.href = downFileSrc;
+            link.click();
+            link.remove();
+        } else {
+            kq.dialog.fail('文件缺失！请联系中心人员');
+        }
+    }, function (data) {
+        kq.dialog.fail('下载失败！请联系中心人员');
+    })
+}
+
+//读取UTF8编码的字节，并专为Unicode的字符串  企业申报用
+kq.readUTF = function (arr) {
+    if (typeof arr === 'string') {
+        return arr;
+    }
+    var UTF = '';
+    for (var i = 0; i < arr.length; i++) {
+        var one = arr[i].toString(2),
+            v = one.match(/^1+?(?=0)/);
+        if (v && one.length == 8) {
+            var bytesLength = v[0].length;
+            var store = arr[i].toString(2).slice(7 - bytesLength);
+            for (var st = 1; st < bytesLength; st++) {
+                store += arr[st + i].toString(2).slice(2)
+            }
+            UTF += String.fromCharCode(parseInt(store, 2));
+            i += bytesLength - 1
+        } else {
+            UTF += String.fromCharCode(arr[i])
+        }
+    }
+    return UTF;
+}
+
+/** 判断链接是否存在 */
+kq.checkHtmlExist = function (url) {
+    var isExist = false;
+    kq.ajax_html(url, {}, function (data) {
+        isExist = true;
+    }, function () {
+        isExist = false;
+    });
+    return isExist;
+}
+
+
+/*----------------------------------------------------------------------------------------------------------*/
+/*----------------------------- 绑定登记类型（预约, 登记申请-个人, 登记申请-法人） ------------------------------*/
+/*----------------------------------------------------------------------------------------------------------*/
+kq.bindCanApplyBuss = function (layerTitle, currBindFlag, reloadGridFunc) {
+    var iframeWin = null
+        , iframeControl = null
+        , savedFlag = true;
+    layer.open({
+        type: 2
+        , title: layerTitle
+        , shade: 0.3
+        , modal: true
+        , area: ['92%', '90%']
+        , content: kq.path.common + 'page/djlxgl/batchCanBussiness.html'
+        , success: function (layero, index) {
+            iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+            iframeControl = new iframeWin.BusinessController();
+            iframeControl.init(currBindFlag);
+        }
+        , cancel: function (index, layero) {
+            savedFlag = iframeControl.getHasSavedFlag();
+            if (!savedFlag) {
+                if (confirm('本次编辑内容尚未保存，确定要关闭么')) {
+                    layer.close(index);
+                }
+                return false;
+            }
+        }
+        , end: function () {
+            if (kq.assert.isFunction(reloadGridFunc)) {
+                reloadGridFunc();
+            }
+        }
+    });
+}
+
+// 后台获取登记类型树的处理loadfilter：配置预约、登记申请个人、登记申请法人
+kq.handlerRegTypeTreeData = function (regdata, configBtnSelector, configBtnText, filterFlag, sortField, categoryShowFlag, needConvertTree) {
+    var newdata = null;
+    if ($.isEmptyObject(regdata) || $.isEmptyObject(regdata.treeList)) {
+        kq.dialog.alert(kq.alertModuleMsg.djlxEmptyData);
+        kq.addOrRemoveDisabled(configBtnSelector, 'disabled');
+        return [];
+    }
+
+    // 处理数据
+    newdata = kq.handlerApplyBDCDJLX(regdata.treeList, filterFlag, sortField, categoryShowFlag, needConvertTree);
+    if ($.isEmptyObject(newdata)) {
+        var alertMsg = '暂无可' + configBtnText + '类型！可点击【可' + configBtnText + '流程配置】按钮进行配置';
+        if (kq.assert.isNotEmpty(configBtnSelector) && $(configBtnSelector).length) {
+            layer.open({
+                title: '提示信息'
+                , content: alertMsg
+                , btn: ['开始配置', '暂不配置']
+                , yes: function (index, layero) {
+                    layer.close(index);
+                    $(configBtnSelector).trigger('click');
+                }
+                , btn2: function (index, layero) {
+                    layer.close(index);
+                }
+            });
+        } else {
+            if (configBtnSelector == null && kq.assert.isNotEmpty(configBtnText)) {
+                alertMsg = configBtnText;
+            }
+            kq.dialog.alert(alertMsg);
+        }
+
+        return [];
+    }
+    return newdata;
+}
+
+
+/**
+ * 处理登记类型: 没有叶子节点的都不显示, 根据传参确定是否需要保存分级目录
+ *  参数说明：
+ *      data: 要处理的数据    
+ *      filterFlag: 取值: openFilter 和 closeFilter, 是否开启过滤, 如果开启, 那就根据指定的sortField只筛选出sortField=1的类型, 否则就只是去除没有叶子节点的登记大类和分级目录
+ *      sortField:  取值: sfkyy, sfksq 和 sfksq_qy, 针对的处理字段, 比如只获取可以预约的登记类型, 那么field就可以是 sfkyy
+ *      categoryShowFlag: 取值: showCategory 和 hideCategory, 是否保留分级目录
+ *      needConvertTree: 取值：convertToTree 和 notConvertToTree, 是否在处理之前先将给的数据data转换成树级结果
+ *      bdclx: 条件参数, 不动产类型, 若传值, 则根据给定的不动产类型进行筛选, 比如：土地、土地及房屋...
+ */
+kq.handlerApplyBDCDJLX = function (data, filterFlag, sortField, categoryShowFlag, needConvertTree, bdclx) {
+    var rList = []
+        , toCate = false
+        , toFilter = true
+        , catebybdclx = kq.assert.isNotEmpty(bdclx) ? true : false;
+
+    toFilter = (filterFlag == 'openFilter' ? true : false);        // 是否开启筛选功能：若是false则表示不根据sortField字段进行筛选，只是过滤掉数据中不存在下级子节点的数据
+    toCate = (categoryShowFlag == 'showCategory' ? true : false);  // 是否分类：若是false则表示不需要分级目录
+
+    // 是否需要先转换成tree
+    if (needConvertTree == 'convertToTree') {
+        data = kq.filterTreeData(data, 'id', 'pid');
+    }
+
+    // 开始处理
+    $.each(data, function (fi, fitem) {                     // 循环处理登记大类 
+        if (!$.isEmptyObject(fitem.children)) {
+            var firstRegNode = $.extend(true, [], fitem)
+                , fitemId = fitem.id || fitem.ID || '';
+            firstRegNode.children = [];
+
+            $.each(fitem.children, function (si, sitem) {   // 循环处理分级目录or登记小类 
+                var secondRegNode = $.extend(true, [], sitem)
+                    , sitemId = sitem.id || sitem.ID || '';
+                secondRegNode.children = [];
+
+                if ($.isEmptyObject(sitem.children)) {
+                    // 如果没有三级节点, 则判断是分级目录, 还是登记类型
+                    var sitemLevel = sitem.level || sitem.LEVEL || ''
+                        , sitemFlow = sitem.is_flow || sitem.IS_FLOW || ''
+                        , sitemBdclx = sitem.bdclx || sitem.BDCLX || '';
+
+                    if (sitemLevel == 2 && sitemFlow != 1) {
+                        if (!toFilter || (sitem[sortField] == 1 && (catebybdclx ? sitemBdclx == bdclx : true))) {
+                            firstRegNode.children.push(sitem);
+                        }
+                    }
+                } else {                                    // 循环处理登记小类 
+                    var pList = [];
+                    $.each(sitem.children, function (ti, titem) {
+                        var titemBdclx = titem.bdclx || titem.BDCLX || '';
+                        if (!toFilter || (titem[sortField] == 1 && (catebybdclx ? titemBdclx == bdclx : true))) {
+                            // titem.parent = toCate ? sitem : fitem;
+                            titem._parentId = titem.parentId = (toCate ? sitemId : fitemId);
+                            pList.push(titem);
+                        }
+                    })
+                    if (toCate) {
+                        secondRegNode.children = pList;
+                        firstRegNode.children.push(secondRegNode);
+                    } else {
+                        $.merge(firstRegNode.children, pList);
+                    }
+                }
+            })
+            if (firstRegNode.children.length) {
+                rList.push(firstRegNode);
+            }
+        }
+    })
+    return rList;
+}
+
+/*----------------------------------------------------------------------------------------------------------*/
+/*----------------------------- 绑定附件（查档, 登记申请-法人） ------------------------------*/
+/*----------------------------------------------------------------------------------------------------------*/
+kq.bindAffixBuss = function (layerTitle, objAffix, reloadGridFunc) {
+    var iframeWin = null
+        , iframeControl = null
+        , savedFlag = true;
+    layer.open({
+        type: 2
+        , title: layerTitle
+        , shade: 0.3
+        , modal: true
+        , area: ['70%', '90%']
+        , content: kq.path.common + 'page/comm/ConfigAffix.html?code=' + objAffix.processCode + '&dictcode=' + objAffix.dictcode
+        , success: function (layero, index) {
+            iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+            iframeControl = new iframeWin.AffixController();
+            iframeControl.init(objAffix);
+        }
+        , cancel: function (index, layero) {
+
+        }
+        , end: function () {
+            if (kq.assert.isFunction(reloadGridFunc)) {
+                reloadGridFunc();
+            }
+        }
+    })
+
+
+}
+
+
+/*----------------------------------------------------------------------------------------------------------*/
+/*----------------------------- iframe 动态创建及释放其所占内存 ------------------------------*/
+/*----------------------------------------------------------------------------------------------------------*/
+
+/** 
+* 动态创建iframe 
+* @param dom 创建iframe的容器，即在dom中创建iframe。dom可以是div、span或者其他标签。 
+* @param src iframe中打开的网页路径 
+* @param onload iframe加载完后触发该事件，可以为空 
+* @return 返回创建的iframe对象 
+*/
+kq.createIframe = function (dom, src, isAppend, onload) {
+    //在document中创建iframe 
+    var iframe = document.createElement("iframe");
+
+    //设置iframe的样式 
+    try {
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.margin = '0';
+        iframe.style.padding = '0';
+        iframe.style.overflow = 'hidden';
+        iframe.style.border = 'none';
+        iframe.style.visibility = 'visible';
+    } catch (e) {
+        console.log(e);
+    }
+
+    // 绑定iframe的onload事件 
+    if (onload && Object.prototype.toString.call(onload) === '[object Function]') {
+        if (iframe.attachEvent) {
+            iframe.attachEvent('onload', onload);
+        } else if (iframe.addEventListener) {
+            iframe.addEventListener('load', onload);
+        } else {
+            iframe.onload = onload;
+        }
+    }
+
+    iframe.src = src;
+
+    //把iframe加载到dom下面 
+    dom.appendChild(iframe);
+    return iframe;
+}
+
+/** 
+* 销毁iframe，释放iframe所占用的内存。 
+* @param iframe 需要销毁的iframe对象 
+*/
+kq.destroyIframe = function (iframe) {
+    // 把iframe指向空白页面，这样可以释放大部分内存
+    iframe.src = 'about:blank';
+    try {
+        iframe.contentWindow.document.write('');
+        iframe.contentWindow.document.clear();
+    } catch (e) {
+        console.log(e);
+    }
+
+    iframe.parentNode.removeChild(iframe);      //把iframe从页面移除 
+}
+
+
+/** #################################################################################################### */
+/** ######################################## 网站页脚配置 ############################################### */
+/** #################################################################################################### */
+kq.getConfigedFootHtml = function (succFunc) {
+    var footHtml = '';
+    kq.ajax_html(kq.path.common + 'pc/foot/foot.html', {}, function (data) {
+        footHtml = data;
+        if (kq.assert.isFunction(succFunc)) {
+            succFunc(data);
+        }
+    });
+    return footHtml;
+}
+
+// 基本信息模块
+kq.renderFootBasicModule = function (basicData) {
+    $('#websiteBasicInfoWrapper > p[id $= "Wrapper"]').html('');
+	$('#websiteWexinIconWrapper > img').attr('src', "");  //默认不显示微信二维码
+    if (!$.isEmptyObject(basicData)) {
+        $.each(basicData, function (key, itemData) {
+            if (itemData.CHECKED == 'yes') {
+				if (itemData.ID == 'fEwm') {
+					var ewmPath = itemData.FCONTENT;
+					ewmPath = ewmPath.replace(/..\/..\/..\//g, kq.path.base);
+					$('#websiteWexinIconWrapper > img').attr('src', ewmPath);
+					return true;
+				}
+                var itemDom = $('#websiteBasicInfoWrapper > p[id ^= "' + itemData.ID + '"]')
+                    , basicHtml = []
+                    , lastHtml = '';
+
+                // 内容：是否需要标题、是否有链接
+                if ($.inArray(itemData.ID, ['fOrganizer', 'fRecordInfo', 'fRecordNumber']) == -1) {
+
+                }
+                basicHtml.push(itemData.FNAME + '：');
+
+                if (kq.assert.isEmpty(itemData.FSITE)) {
+                    basicHtml.push(itemData.FCONTENT);
+                } else {
+                    basicHtml.push('<a href="' + itemData.FSITE + '" target="_blank">' + itemData.FCONTENT + '</a>');
+                }
+                lastHtml = basicHtml.join('');
+
+                // 是否已经存在对应的DOM元素
+                if (itemDom.length) {
+                    itemDom.html(lastHtml).addClass('mr15');
+                } else {
+                    lastHtml = '<p class="d-inline-block mr15">' + lastHtml + '</p>';
+                    $('#websiteBasicInfoWrapper').append(lastHtml);
+                }
+            }
+        })
+    }
+}
+
+// 网站标识模块
+kq.renderFootGovModule = function (govData) {
+    $('#websiteIconFlagWrapper').html('').hide();
+    if (!$.isEmptyObject(govData)) {
+        $.each(govData, function (key, itemData) {
+            if (itemData.CHECKED == 'yes') {
+                var siteHtml = [
+                    '<a href="' + (kq.assert.isEmpty(itemData.FSITE) ? 'javascript:void(0)' : itemData.FSITE) + '" target="_blank">'
+                    , '<img src="' + kq.path.base + itemData.ICONPATH + '"/>'
+                    , '</a>'].join('');
+                $('#websiteIconFlagWrapper').show().append(siteHtml);
+            }
+        })
+    }
+}
+
+// 友情链接模块
+kq.renderFootFLinkModule = function (fLinkData) {
+    var fLinkHtml = []
+        , ulWidth = 0;
+    $('#fLinkWrapper').html('').hide();
+    if (!$.isEmptyObject(fLinkData)) {
+        $.merge(fLinkHtml, [
+            '<div class="d-inline-block hd">友情链接：</div>'
+            , '<div class="d-inline-block swiper-container" id="fLinks"><ul class="swiper-wrapper">']
+        );
+
+        $.each(fLinkData, function (key, itemData) {
+            $.merge(fLinkHtml, [
+                '<li class="swiper-slide d-inline-block">'
+                , '<a class="TXTovehid" target="_blank" href="' + (kq.assert.isEmpty(itemData.FSITE) ? 'javascript:void(0);' : itemData.FSITE) + '" title="' + itemData.FNAME + '">'
+                , itemData.FNAME
+                , '</a></li>']
+            );
+        })
+        fLinkHtml.push('</ul></div>');
+        $('#fLinkWrapper').html(fLinkHtml.join('')).show();
+
+        // 无缝滚动
+        // this.swiperTheLink = function () {
+        //     var mySwiper = new Swiper('.swiper-container', {
+        //         autoplay: 10        // 自动滚动
+        //         , autoplayDisableOnInteraction: false
+        //         , loop: true        // 循环
+        //         , speed: 10000      // 滚动速度
+        //         , slidesPerView: 3  // slide可见数量
+        //         , spaceBetween: 8   // slide之间的距离（单位px）
+        //         , grabCursor: true  // 鼠标覆盖Swiper时指针会变成手掌形状，拖动时指针会变成抓手形状
+        //         , roundLengths: true
+        //     })
+
+        //     //鼠标覆盖停止自动切换, 移出开始自动切换
+        //     // $('.swiper-container').off('mouseenter').off('mouseleave');
+        //     // $('.swiper-container').mouseenter(function () {
+        //     //     mySwiper.stopAutoplay(); // 停止
+        //     // }).mouseleave(function () {
+        //     //     mySwiper.startAutoplay(); // 开启
+        //     // })
+        // }
+    }
+}
+/** #################################################################################################### */
+/** ######################################## 网站页脚配置End ############################################### */
+/** #################################################################################################### */
+
+$(window).bind("load",function(){
+	kanqSocket();
+})
+
+var kanqSocket = function(){
+	
+	var  websocket;
+	
+	this.init = function(){
+		if('WebSocket' in window){
+			/*var user = kq.getCurrentUser();
+			if(kq.assert.isEmpty(user)){
+				return false;
+			}
+			var userName = kq.getCurrentUser().USER_INFO.USER_NAME;*/
+			websocket = new WebSocket("ws://"+window.location.host+"/bigplatform-shell/websocket");
+	    }else{
+	        alert('Not support websocket')
+	    }
+
+	    //连接发生错误的回调方法
+	    websocket.onerror = function(){
+	    };
+
+	    //连接成功建立的回调方法
+	    websocket.onopen = function(event){
+	    }
+	    //接收到消息的回调方法
+	    websocket.onmessage = function(event){
+	        setMessageInnerHTML(event.data);
+	    }
+
+	    //连接关闭的回调方法
+	    websocket.onclose = function(){
+	    }
+
+	    //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+	    window.onbeforeunload = function(){
+	        websocket.close();
+	    }
+
+	    //将消息显示在网页上
+	    function setMessageInnerHTML(innerHTML){
+	    	layer.open({
+	    		title:""
+		        ,type: 2
+		        , shade: 0.3
+		        , modal: true
+		        , area: ['32%', '40%']
+	    		, btn:"确定"
+	    		, btnAlign:'c'
+		        , content:kq.path.base + "notice.html?notice="+encodeURIComponent(innerHTML)
+		        , yes: function (index, layero) {
+		        	websocket.close();
+		        	layer.close(index);
+		        	return false;
+		        }, cancel: function (index, layero) {
+		        	websocket.close();
+		            layer.close(index);
+		            return false;
+		        }
+		    })
+	    }
+
+	    //关闭连接
+	    function closeWebSocket(){
+	        websocket.close();
+	    }
+
+	}
+	if(window == window.top){
+		init();
+	}
+	
+}
+
+//!kanqSocket();
+
+

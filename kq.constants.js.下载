@@ -1,0 +1,56 @@
+var kq = kq || {};
+
+(function _init_constant($, kq, win) {
+	if (kq.constant === undefined) {
+		kq.constant = {};
+	}
+	var constant = kq.constant;
+
+	constant.mh = "mh";
+	constant.mobile = "mobile";
+
+}(jQuery, kq, window));
+
+(function _init_path($, kq, win) {
+	if (kq.path === undefined) {
+		kq.path = {};
+	}
+	var path = kq.path;
+	var baseUrl;
+	if (typeof window.location.origin === "undefined") {
+		baseUrl = window.location.protocol + "//" + window.location.host;
+	}
+	else {
+		baseUrl = window.location.origin;
+	}
+	path.domain = common.context;
+
+	path.mh = common.context + "/mh/"; // 门户
+	path.mobile = common.context + "/mobile/"; // 移动端
+	path.page = common.context + "/common/page/"; // 后台
+	path.shell = common.context + "/shell/"; // 壳子
+	path.base = common.context + "/"; // 根目录
+	path.affix = common.context + "/AFFIX/"; // 附件材料目录
+
+	path.common = common.context + "/common/";
+	path.module = common.context + "/module/";
+	path.jdcx = common.context + "/module/jdcx/";
+	path.zscy = common.context + "/module/zscy/";
+	path.yuyue = common.context + "/module/yuyue/";
+	path.wxpay = common.context + "/module/wxpay/"
+	path.yushenbao = common.context + "/module/yushenbao/";
+	path.center = common.context + "/module/center/";
+	path.qysb = common.context + "/module/qysb/";
+	path.dacx = common.context + "/module/dacx/";
+	path.jhcx = common.context + "/module/jhcx/";
+	path.qysb_nx = common.context + "/module/qysb/";
+
+	path.checkPath = common.context + "/affixManager/checkFileExist.do"; 
+	path.affixPath = common.context + "/affixManager/download.do?path=";
+	path.downFile = common.context + "/affixManager/downFile.do?";
+
+	if (!!kq.init) {
+		kq.init(); // 初始化kq.url
+	}
+
+}(jQuery, kq, window));

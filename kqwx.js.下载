@@ -1,0 +1,1204 @@
+﻿﻿var kqwxModel = function () {
+	this.VerifyAuthorityUrl = kq.path.common + "wxview/queue/GETWXPZ.do";
+	this.getPersonInforUrl = kq.path.module + "view/personalCenter/QUERY_ZTXX.do"
+	this.getOpenIdUrl = kq.path.common + "wxview/WYSQYZ.do";
+	this.resBillMaterials=kq.path.yuyue + "yuyueView/wxres/getResBillMaterials.do";
+	this.getWemenuInforUrl = kq.path.common + 'wxview/wemenu/obtainAllMenus.do';
+	this.getUserInforUrl = kq.path.common + 'wxview/personal/wechatUserInfor.do';
+	this.getDetectInfoUrl = kq.path.common + "identityVerification/wxview/authentication/getDetectInfo.do";
+	this.getIsAuthenticationUrl = "GET_DHXX_BY_URL";
+	this.updateAuthenticationStatus = "COMMON_USERVIEW_UPDATE_VERIFICATION";
+	this.getUserInfoByOpenIdUrl = "COMMON_GETUSER_INFO_BY_OPENID";
+	this.getPositionUrl ="COMMON_CMS_XTCS_SEARCH";
+}
+var me = this;
+kqwx = {
+	model: new kqwxModel()
+	, indexpage:  kq.path.common + 'mobile/wemenu/wemain.html'
+};
+
+$(function () {
+	kqwx.init();
+	kqwx.clearSearch();
+	var url = window.location.href;
+	isAlonePage = (typeof isAlonePage === 'undefined') ? false : isAlonePage;
+	isMainPage = (typeof isMainPage === 'undefined') ? false : isMainPage;
+	if(!isAlonePage){
+		kqwx.getMenu();
+		kqwx.footHandler();
+	}
+	//安卓手机输入框被键盘遮挡问题
+	$("input").on("click",function(){
+		var target = this;
+		setTimeout(function(){
+			target.scrollIntoView(true);
+			target.scrollIntoViewIfNeeded();
+		},500)
+	})
+});
+
+//获取菜单
+kqwx.getMenu = function () {
+		callback = function (data) {
+			kqwx.menuData = data.data;
+		}
+		kq.ajax_url(kqwx.model.getWemenuInforUrl, {}, callback);
+	}
+
+//渲染页脚菜单
+kqwx.footHandler = function() {
+		var tabbar = '<div class="weui-tabbar">';
+		if(sessionStorage.getItem("tabbarID")==null){
+			sessionStorage.setItem("tabbarID",kqwx.menuData[0].id);
+		}
+		$.each(kqwx.menuData,function(index,parent){
+			var tabbarid = sessionStorage.getItem("tabbarID");
+			var select = false;
+			if(tabbarid==parent.id){//设置为选中状态
+				select = true;
+				tabbar +="<style>."+parent.key+":before{ color:#d0021b; }</style>";
+			}
+			tabbar +='<div iden="'+parent.id+'" class="weui-tabbar__item '+(select?'weui-bar__item--on':'')+' ">';
+			tabbar +='	<div class="weui-tabbar__icon">';
+			tabbar +='		<i class="'+parent.key+'"></i>';
+			tabbar +='	</div>';
+			tabbar +='	<p class="weui-tabbar__label">'+parent.name+'</p>';
+			tabbar +='</div>';
+		});
+		tabbar+='</div>';
+		$("body").append(tabbar);
+		
+		$('.weui-tabbar__item').off('click').on('click', function(){
+			sessionStorage.setItem("tabbarID",$(this).attr("iden"));
+			var iconClass = $(this).find("i").attr('class');
+			$(this).parent().find("style").remove();//因为不能直接修改伪元素，所以采用添加和删除style的方法
+			$(this).parent().append("<style>."+iconClass+":before{ color:#d0021b; }</style>");
+			
+			$(this).parent().children().removeClass("weui-bar__item--on");//去掉所有选中的
+			$(this).addClass("weui-bar__item--on");
+			kqwx.isLogin();
+			if(!isMainPage){//首页不跳转
+				window.location.href = kq.path.common+'mobile/wemenu/wemain.html';
+			}else{
+				var indexController = new xmainController();
+				indexController.init();
+			}
+	    })
+	    kqwx.isLogin();
+	}
+//判断个人中心页面时否登录
+kqwx.isLogin = function(){
+	if(sessionStorage.tabbarID=="B231FA01D0814AE9B2BF2E25A00B9812"){//如果是个人中心，先判断是否已经登录
+		var user = kq.getCurrentUser().USER_INFO;
+		if($.isEmptyObject(user)){
+			layer.open({
+				 closeBtn: 0
+				 ,area: '76%'
+				 ,content: '您尚未登录，请登录！'
+                 , yes: function (index, layero) {
+         	    	window.location.href= kq.path.common + "mobile/login.html";
+                 }
+             });
+		}
+	}
+}
+//清空搜索框
+kqwx.clearSearch = function(){
+	$("body").on('click','#searchClear',function(){
+		$("#searchInput").val("");
+	})
+}
+
+//初始化
+kqwx.init = function () {
+	 //关闭弹出框
+    $('#MSG_dialogs').on('click', '.weui-dialog__btn', function () {
+        $(this).parents('.js_dialog').fadeOut(200);
+    });
+
+    //添加版权说明
+    kqwx.jgmc = kq.GETXTCS({ CSMC: "jgmc" }).CSGZ;
+
+    kqwx.html = '<p class="weui-footer__text">Copyright &copy; ' + kqwx.jgmc + '</p>' +
+                '<p class="weui-footer__text">技术支持：苍穹数码技术股份有限公司</p>';
+    $('#BQSM').html(kqwx.html);
+    
+    $("title").html(kqwx.jgmc);
+}
+
+
+//lx:CG,TS,JG
+kqwx.tck = function (lx, msg) {
+    var ico = "";
+    if (lx == "CG") { ico = '<i class="weui-icon-success"></i>'; }
+    if (lx == "TS") { ico = '<i class="weui-icon-info-circle"></i>'; }
+    if (lx == "JG") { ico = '<i class="weui-icon-warn"></i>'; }
+    $('#MSG_NR').html(ico + msg);
+    var $MSG_TCK = $('#MSG_TCK');
+    $MSG_TCK.fadeIn(200);
+};
+
+//当前日期和时间
+kqwx.curentTime = function(){ 
+        var now = new Date();
+       
+        var year = now.getFullYear();       //年
+        var month = now.getMonth() + 1;     //月
+        var day = now.getDate();            //日
+       
+        var hh = now.getHours();            //时
+        var mm = now.getMinutes();          //分
+       
+        var clock = year + "-";
+       
+        if(month < 10)
+            clock += "0";
+       
+        clock += month + "-";
+       
+        if(day < 10)
+            clock += "0";
+           
+        clock += day + " ";
+       
+        if(hh < 10)
+            clock += "0";
+           
+        clock += hh + ":";
+        if (mm < 10) clock += '0'; 
+        clock += mm; 
+        return(clock); 
+   } 
+
+//将秒转换为时分秒
+$.seconds2Hms = function (seconds) {
+    var hours = Math.floor(seconds / 60 / 60);
+    var minutes = Math.floor((seconds - hours * 60 * 60) / 60);
+    seconds = seconds - hours * 60 * 60 - minutes * 60;
+    var str = '';
+    if (hours > 0) {
+        str += hours + '小时';
+    }
+    if (minutes > 0) {
+        str += minutes + '分';
+    }
+    else if (str != '') {
+        str += minutes + '分';
+    }
+    str += seconds + '秒';
+    return str;
+}
+
+//时间对象转字符串
+kqwx.formatDate = function (myDate) {
+	var dateTemp = myDate.getFullYear()
+    + "-"
+    + ((myDate.getMonth() + 1 < 10) ? "0" + (myDate.getMonth() + 1) : myDate.getMonth() + 1)
+    + "-"
+    + ((myDate.getDate() < 10) ? "0" + myDate.getDate() : myDate.getDate());
+    return (dateTemp);
+}
+
+//获取当前时间年月日字符串
+kqwx.chineseDate = function (myDate) {
+	var dateTemp = myDate.getFullYear()
+    + "年"
+    + ((myDate.getMonth() + 1 < 10) ? "0" + (myDate.getMonth() + 1) : myDate.getMonth() + 1)
+    + "月"
+    + ((myDate.getDate() < 10) ? "0" + myDate.getDate() : myDate.getDate()) + "日";
+    return (dateTemp);
+}
+
+//判断当前时间为上午还是下午：返回true or false 是上午返回true
+kqwx.isAm = function () {
+	var myDate = new Date();
+    return (myDate.getMinutes() + 1) < 12;
+}
+
+/**
+ * 如：formatDateStamp(new Date().getTime());//2017-05-12 09:09
+ */
+kqwx.formatTime = function (time){
+	 var date = new Date(time);
+	    var year = date.getFullYear(),
+	        month = date.getMonth()+1,//月份是从0开始的
+	        day = date.getDate(),
+	        hour = date.getHours(),
+	        min = date.getMinutes();
+	    var newTime = year + '-' +
+	                (month < 10? '0' + month : month) + '-' +
+	                (day < 10? '0' + day : day) + ' ' +
+	                (hour < 10? '0' + hour : hour) + ':' +
+	                (min < 10? '0' + min : min);
+
+	    return newTime;         
+}
+
+
+//和当前时间作比较   
+kqwx.compareCurentTime = function(TP,T) { //rt>1大于当前时间；rt=0等于当前时间；rt<0小于当前时间
+    var rt;
+    var nowTime =  kqwx.curentTime();
+    this.compare = function (T) {
+	    if (T > nowTime) {
+	    	rt = 1;
+	    }
+	    if (T == nowTime) {
+	    	rt = 0;
+	    }
+	    if (T < nowTime) {
+	    	rt = -1;
+	    }
+    }
+    switch (TP) {
+    	case 'ALL':
+    		this.compare(T);
+    		break;
+    	case 'DAT':
+    		var reg = /([\s][^\s]+)$/;
+    		nowTime = nowTime.replace(reg, '');
+    		this.compare(T);
+    	case 'TIM':
+    		var reg = /([^\s]+)$/;
+    		nowTime = nowTime.match(reg, '')[1];
+    		this.compare(T);
+    }
+    
+	return (rt);
+}
+
+//微信jsapi需要使用的JS接口列表
+$.jsApiList = [
+        'checkJsApi',
+        'onMenuShareTimeline',
+        'onMenuShareAppMessage',
+        'onMenuShareQQ',
+        'onMenuShareWeibo',
+        'onMenuShareQZone',
+        'hideMenuItems',
+        'showMenuItems',
+        'hideAllNonBaseMenuItem',
+        'showAllNonBaseMenuItem',
+        'translateVoice',
+        'startRecord',
+        'stopRecord',
+        'onVoiceRecordEnd',
+        'playVoice',
+        'onVoicePlayEnd',
+        'pauseVoice',
+        'stopVoice',
+        'uploadVoice',
+        'downloadVoice',
+        'chooseImage',
+        'previewImage',
+        'uploadImage',
+        'downloadImage',
+        'getNetworkType',
+        'openLocation',
+        'getLocation',
+        'hideOptionMenu',
+        'showOptionMenu',
+        'closeWindow',
+        'scanQRCode',
+        'chooseWXPay',
+        'openProductSpecificView',
+        'addCard',
+        'chooseCard',
+        'openCard'
+];
+
+//对列
+var Queue=function() {
+
+    //初始化队列（使用数组实现）
+    var items = [];
+
+    //向队列（尾部）中插入元素
+    this.enqueue = function (element) {
+        items.push(element);
+    }
+
+    //从队列（头部）中弹出一个元素，并返回该元素
+    this.dequeue = function () {
+        return items.shift();
+    }
+
+    //查看队列最前面的元素（数组中索引为0的元素）
+    this.front = function () {
+        return items[0];
+    }
+
+    //查看队列是否为空，如果为空，返回true；否则返回false
+    this.isEmpty = function () {
+        return items.length == 0;
+    }
+
+    //查看队列的长度
+    this.size = function () {
+        return items.length;
+    }
+
+    //查看队列
+    this.print = function () {
+        //以字符串形势返回
+        return items.toString();
+    }
+}
+
+kqwx.FormatMoney = function (money) {  
+	var tpMoney = '0.00';  
+	if(undefined != money){  
+	    tpMoney = money;  
+	}  
+	tpMoney = new Number(tpMoney);  
+	if(isNaN(tpMoney)){  
+	  return '0.00';  
+	}  
+	tpMoney = tpMoney.toFixed(2) + '';  
+	var re = /^(-?\d+)(\d{3})(\.?\d*)/;  
+	while(re.test(tpMoney)){  
+	     tpMoney = tpMoney.replace(re, "$1,$2$3")  
+	    }  
+	          
+	return tpMoney; 
+}  
+
+//map对象深度拷贝
+kqwx.deepCopy = function (source) { 
+var result={};
+for (var key in source) {
+      result[key] = typeof source[key]==='object'? deepCoypy(source[key]): source[key];
+   } 
+   return result; 
+}
+
+//获取预约材料清单
+kqwx.getCLQD = function (yylxid) {
+	var qd = [];
+	kq.ajax_url(
+			kqwx.model.resBillMaterials
+			,{"YYLXID" : yylxid}
+			,function (data) {
+				data = data.data;
+				if (!!data) {
+			    	for (var i = 0; i < data.length; i++) {
+				        qd.push({id: data[i].SJZDID,name: data[i].SJZDMC});
+			    	}
+		    	}
+			});
+	
+	return qd;
+}
+
+//权限验证
+kqwx.getyz_dug = false;
+kqwx.getyz = function (url) {
+    var rt_data = null;
+    kq.ajax_url(
+    	kqwx.model.VerifyAuthorityUrl
+    	,{ url: url}
+    	, function (data) {
+    		rt_data = data;
+    	}
+	)
+   
+    return rt_data;
+};
+
+//获取主体信息
+kqwx.queryZTXX = function (openId) {
+	kq.ajax_url(
+			kqwx.model.getPersonInforUrl
+			,{openId: openId}
+			,function (data) {
+				if(!!data) {
+					kqwx.ZTXXData = data.data;
+				}
+			});
+	return kqwx.ZTXXData;
+}
+
+kqwx.wechatUserInfor = function (code) {
+	var callback = function (data) {
+		data = data.data;
+		if (!kq.assert.isEmpty(data)) {
+			sessionStorage.setItem("WxUserInfor", JSON2.stringify(data.weiXinUser));
+        }
+	}
+	kq.ajax_url(kqwx.model.getUserInforUrl,{code:code},callback);
+}
+
+//获取code
+kqwx.wxCode = function () {
+	kqwx.code = kq.getUrlParam("code");
+	if (kqwx.code) {
+		return kqwx.code;
+	} 
+	var localUrl = location.href.split('#')[0];
+	var REDIRECT_URI = encodeURI(localUrl); 
+	kqwx.qxxx = kqwx.getyz(localUrl);
+	window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' + kqwx.qxxx.data.app_id + 
+		"&redirect_uri="+REDIRECT_URI+"&response_type=code&scope=snsapi_base&state=1#wechat_redirect";
+	return kqwx.code;
+}
+
+/*写入cookie*/
+kqwx.setCookie = function (name, value) {
+	var Days = 30;
+    var exp = new Date();
+    exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
+    document.cookie = name + "=" + escape(value) + ";expires=" + exp.toGMTString() + ";path=/";
+}
+	
+/* 读cookie */
+kqwx.getCookie = function(name) {
+    var arr = document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)(;|$)"));
+    if (arr != null) {
+        return unescape(arr[2]);
+    }
+    return null;
+}
+
+kqwx.isWeiXin = function(){
+　　var ua = window.navigator.userAgent.toLowerCase();
+　　if(ua.match(/MicroMessenger/i) == 'micromessenger'){
+　　　　return true;
+　　}
+　　else{
+　　　　return false;
+　　}
+}
+
+/** 初始化搜索框 */
+kqwx.initSearchBar = function(model){
+	function hideSearchResult(){
+		model.$searchResult.hide();
+		model.$searchInput.val('');
+	 }
+	 function cancelSearch(){
+		 hideSearchResult();
+		 model.$searchBar.removeClass('weui-search-bar_focusing');
+		 model.$searchText.show();
+	 }
+	
+	 model.$searchText.on('click', function(){
+		 model.$searchBar.addClass('weui-search-bar_focusing');
+		 model.$searchInput.focus();
+	 });
+	 model.$searchInput.on('blur', function () {
+        if(!this.value.length) 
+        	cancelSearch();
+    }).on('input', function(){
+        if(this.value.length) {
+        	model.$searchResult.show();
+        } else {
+        	model.$searchResult.hide();
+        }
+    });
+	 model.$searchClear.on('click', function(){
+	     hideSearchResult();
+	     model.$searchInput.focus();
+	 });
+	 model.$searchCancel.on('click', function(){
+	     cancelSearch();
+	     model.$searchInput.blur();
+	 });
+}
+/** ############################################################################################################# */
+/** ################################################ 区域定位 ################################################ */
+/** ############################################################################################################# */
+kq.areaData = null;		// 区域数据
+kq.areaLocate = {};		// 区域相关对象
+kq.selectCode = null;	// 当前选择区域
+kq.areaLocate.initAreaData = function (param) {
+	kq.areaData = $.isEmptyObject(kq.assert.isEmpty(kq.areaData)) ? kq.getAreaCodeData(param) : kq.areaData;	// 获取数据
+}
+
+
+/** 渲染head定位 */
+
+kq.renderHeadLocate = function () {
+	kq.areaLocate.initAreaData(); 	// 获取数据
+
+	// 省级渲染
+	$.each(kq.areaData.province, function (i, item) {
+		kq.areaLocate._renderLocateItem(item.code, item.address, 'province');  // 获取模板
+	})
+	$("#locate_province .locate-lists").html(kq.areaLocate.areaHtml.join(''));
+	// 初始化, 默认选择第一个省, 显示县 
+	kq.setDefaultArea();
+
+	// 监听
+	$(document).on('mouseenter', '.locate-item', function () {
+		var me = $(this)
+			, temp_type = me.attr('data_level')
+			, temp_code = me.attr('data_code');
+		// 样式
+		if (!me.hasClass('active')) {
+			me.addClass('hover');
+		}
+		me.siblings().removeClass('hover').parents('div').next().find('.hover').removeClass('hover');
+
+		if (temp_type != 'area') {
+			temp_type == 'province'
+				? sessionStorage.setItem('temp_province', temp_code)
+				: sessionStorage.setItem('temp_city', temp_code); // 存储临时编码
+			kq.areaLocate._renderCityArea(temp_code, temp_type, false, false);   // 渲染
+		}
+		return false;
+	})
+	$(document).off('click', '.locate-item').on('click', '.locate-item', function () {
+		var me = $(this)
+			, temp_type = me.attr('data_level')
+			, temp_code = me.attr('data_code');
+		me.removeClass('hover').addClass('active').siblings().removeClass('active');
+		me.parents('div').next().find('.locate-item').removeClass('active').removeClass('hover');
+		kq.areaLocate._selectArea(temp_code, temp_type, false);   // 选择节点
+		sessionStorage.setItem('currLocate', me.html());
+		$(".locate-title").html(me.html());
+		temp_type == 'area' && $(".locate-panel").hide();
+		return false;
+	})
+}
+
+//下拉框切换回调
+/** 
+ * 生成地区三级联动或二级联动 isSecon为true:二级false三级
+ * kq.areaPicker(wrap, param, isSecon)
+ * 
+ */
+kq.areaPicker = function (wrap, isSecon, param) {
+	var isSecon = isSecon || false;
+	layui.use(['form'], function () {
+		var form = layui.form;
+		var template = ''  			// 三级联动模板
+			, templateHtml = [] 	// 数据渲染拼接模板
+		kq.areaLocate.initAreaData(param); 	// 获取数据
+
+		// 获取模板
+		kq.ajax_html(kq.path.common + 'mobile/area.html', null, function (data) {
+			template = data;
+		})
+		$(wrap).html(template);
+
+		// 省级渲染
+		$.each(kq.areaData.province, function (i, item) {
+			templateHtml.push('<option value="' + item.code + '" data_level="province">' + item.address + '</option>');
+		})
+		//显示省
+		if (!isSecon) {
+			$("#areaPicker #province").html(templateHtml.join('')).find('option:first').prop('selected', true);
+			form.render();
+		}
+
+		kq.setDefaultArea(true);	// 初始化, 默认选择第一个省, 显示县 
+		form.render();
+
+		// 监听省市区选择
+		form.on('select(picker_area)', function (data) {
+			var level = $(data.elem).parent().attr('data-action');
+			level != 'area' && kq.areaLocate._renderCityArea(data.value, level, true, false);
+			if (kq.areaPicker.change) {
+				kq.areaPicker.change(data.value);
+			}
+			form.render();
+		});
+
+	}) /* layui end */
+}
+
+// 初始化显示
+kq.setFstArea = function () {
+	kq.areaLocate.initAreaData(); 	// 获取数据 
+	cacheLevel = 'province';
+	sessionStorage.setItem('province', kq.areaData.province[0].code);
+	sessionStorage.setItem('currLocate', kq.areaData.province[0].address);
+}
+kq.getAreaLevel = function () {
+	var cacheLevel = sessionStorage.hasOwnProperty('area') ? 'area'
+		: sessionStorage.hasOwnProperty('city') ? 'city'
+			: sessionStorage.hasOwnProperty('province') ? 'province' : null;   // 缓存的级别 省级province  市级city  区县级area
+	return cacheLevel;
+}
+kq.setDefaultArea = function (isFormSelect) {
+	var provincecode = null
+		, citycode = null
+		, areacode = null
+		, cacheLevel = kq.getAreaLevel();
+	if (!cacheLevel) {
+		kq.setFstArea();
+	}
+	provincecode = sessionStorage.province;
+	citycode = sessionStorage.city;
+	areacode = sessionStorage.area;
+	kq.assert.isEmpty(provincecode) ? sessionStorage.removeItem('temp_province') : sessionStorage.setItem('temp_province', provincecode);
+	kq.assert.isEmpty(citycode) ? sessionStorage.removeItem('temp_city') : sessionStorage.setItem('temp_city', citycode);
+	kq.assert.isEmpty(areacode) ? sessionStorage.removeItem('temp_area') : sessionStorage.setItem('temp_area', areacode);
+
+	kq.areaLocate._renderCityArea(provincecode, cacheLevel, isFormSelect, true);	// 渲染
+	kq.areaLocate._selectArea(provincecode, cacheLevel, isFormSelect, true);		// 选择节点
+}
+
+// 市区渲染
+// code当前选中的编码  type当前选中的市区县级别   isFormSelect是三级联动框还是head里的定位选择
+kq.areaLocate._renderCityArea = function (code, type, isFormSelect, isFstRender) {
+	layui.use(['form'], function () {
+		var form = layui.form;
+		var data = kq.areaData[code]
+			, templateHtml = []									// 三级联动框拼接模板 
+
+		function getAreaData(typeLevel) {
+			return (typeLevel == 'city' ? kq.areaData[sessionStorage.temp_province] : kq.areaData[sessionStorage.temp_city]);
+		}
+		// 只渲染head定位
+		function _renderLocateSelect(typeLevel, isCity) {
+			var forData = getAreaData(typeLevel)
+				, locateWrap = isCity ? ($("#locate_area").hide(), $("#locate_city")) : $("#locate_area");
+			kq.areaLocate.areaHtml = [];
+			if ($.isEmptyObject(forData)) {
+				locateWrap.hide().find('.locate-lists').html('');
+			} else {
+				$.each(forData, function (key, value) {
+					kq.areaLocate._renderLocateItem(key, value, isCity ? 'city' : 'area');
+				})
+				isCity && ($("#locate_area").hide().find('.locate-lists').html(''));
+				locateWrap.show().find('.locate-lists').html(kq.areaLocate.areaHtml.join(''));
+			}
+		}
+
+		// 只渲染三级联动框
+		function _renderAreaSelect(typeLevel, isCity) {
+			var forData = isFstRender ? getAreaData(typeLevel) : data
+				, areaWrap = isCity ? $("#areaPicker #city") : $("#areaPicker #area")
+				, toHideArea = isCity;
+			toHideArea && $("#areaPicker #area").html('').parent().hide();
+			if ($.isEmptyObject(forData)) {
+				areaWrap.html('').parent().hide();
+				return false;
+			} else {
+				templateHtml = ['<option value="-1">请选择' + (toHideArea ? '市' : '县/区') + '</option>'];
+				$.each(forData, function (key, value) {
+					templateHtml.push('<option value="' + key + '">' + value + '</option>');
+				})
+				areaWrap.html(templateHtml.join('')).parent().show();
+			}
+			if (isCity) {
+				$("#areaPicker #area").html('<option value="-1">请选择县/区</option>').parent().show();
+			}
+			form.render();
+		}
+		// 点击事件
+		if (isFormSelect) {  // 点击三级联动框 
+			if (isFstRender) {
+				var flag = _renderAreaSelect('city', true);	// 如果点击或默认显示的是省级, 则要显示出市级
+				if (type != 'province' && flag != false) {
+					_renderAreaSelect('area');
+				}
+			} else {
+				if (code != '-1') {
+					_renderAreaSelect(type, type == 'province' ? true : false);
+					kq.areaLocate._selectArea(code, type, isFormSelect);
+				} else {
+					if (type == 'city') {
+						$("#areaPicker #area").html('<option value="-1">请选择县/区</option>').parent().show();
+						//$("#areaPicker #area").html('').parent().hide();	// 隐藏区县 
+					}
+				}
+			}
+		} else {
+			if (type == 'province') {
+				_renderLocateSelect('city', true);	// 如果点击或默认显示的是省级, 则要显示出市级
+			} else {
+				isFstRender && _renderLocateSelect('city', true);	// 如果点击或默认显示的是省级, 则要显示出市级
+				_renderLocateSelect('area');
+			}
+			kq.areaLocate._renderLocateCss();
+		}
+	})
+}
+
+kq.areaLocate._renderLocateCss = function () {
+	$("#locate_province .locate-item[data_code=" + sessionStorage.province + "]").addClass('active').siblings().removeClass('active');
+	$("#locate_city .locate-item[data_code=" + sessionStorage.city + "]").addClass('active').siblings().removeClass('active');
+	$("#locate_area .locate-item[data_code=" + sessionStorage.area + "]").addClass('active').siblings().removeClass('active');
+}
+
+// 选择节点
+// code当前选中的编码  type当前选中的市区县级别   isFormSelect是三级联动框还是head里的定位选择
+kq.areaLocate._selectArea = function (code, type, isFormSelect, isFstRender) {
+	layui.use(['form'], function () {
+		var form = layui.form;
+		var provincecode = ''
+			, citycode = ''
+			, areacode = ''
+			, hasAreaWrap = kq.assert.isNotEmpty($('#areaPicker')[0]);  // 当前页面是否显示出了三级联动框; 
+
+		// 当点击head定位时，加入缓存
+		if (!isFormSelect && !isFstRender) {
+			if (type == 'province') { // 只显示省级, 市级下拉框存在但是不选则值
+				provincecode = code;
+			} else if (type == 'city') { // 显示到市级
+				provincecode = sessionStorage.getItem('temp_province');
+				citycode = code;
+			} else {
+				provincecode = sessionStorage.getItem('temp_province');
+				citycode = sessionStorage.getItem('temp_city');
+				areacode = code;
+			}
+			provincecode != '' ? sessionStorage.setItem('province', provincecode) : sessionStorage.removeItem('province');
+			citycode != '' ? sessionStorage.setItem('city', citycode) : sessionStorage.removeItem('city');
+			areacode != '' ? sessionStorage.setItem('area', areacode) : sessionStorage.removeItem('area');
+			// sessionStorage.removeItem('temp_province');
+			// sessionStorage.removeItem('temp_city');
+			// sessionStorage.removeItem('temp_area');
+		}
+
+		// head样式 -- 首次渲染或者点击时样式变化
+		if (!isFormSelect) {
+			kq.areaLocate._renderLocateCss();
+			if (!isFstRender && kq.areaLocate.hasAreaTreeNav) {
+				var treeTypeData = kq.areaLocate._getAreaTreeData();
+				kq.renderTypeTree(kq.areaLocate.treeTypeName, treeTypeData, kq.areaLocate.treeNavWrap, kq.areaLocate.treeBreadNav, '#breadNav', true);
+			}
+			if (!isFstRender && hasAreaWrap) {
+				kq.setDefaultArea(true);
+			}
+		}
+
+		// 当三级联动框选择时
+		function _renderAreaCss() {
+			$("#areaPicker option[value=" + sessionStorage.province + "]").prop('selected', true);
+			$("#areaPicker option[value=" + sessionStorage.city + "]").prop('selected', true);
+			$("#areaPicker option[value=" + sessionStorage.area + "]").prop('selected', true);
+			form.render();
+		}
+		if (isFormSelect) {
+			isFstRender && _renderAreaCss();
+		}
+	})
+}
+
+// 根据点击节点显示左侧树数据
+kq.areaLocate._getAreaTreeData = function () {
+	kq.areaLocate.initAreaData(); 	// 获取数据 
+	var areaDataStr = JSON2.stringify(kq.areaData)
+		, cacheLevel = kq.getAreaLevel()
+		, code = ''
+		, nodeName = ''
+		, rData = [];
+	function _getAreaName(code, isProv) {
+		var reg = isProv == 'province' ? (new RegExp('(' + code + ')(\"\,\"address\"\:\")(.[^\"]*)(\")'))
+			: (new RegExp('(' + code + ')(\"\:\")(.[^\"]*)(\")'));
+		var matchArr = areaDataStr.match(reg);
+		return matchArr != null ? matchArr[3] : '^_kq_error_$';
+	}
+	function _handleAreaNode(code) {
+		var tempObj = kq.areaData[code]
+			, rMap = [];
+		if (tempObj) {
+			$.each(tempObj, function (key, val) {
+				var tempMap = {}, childMap = [];
+				tempMap.id = key;
+				tempMap.text = tempMap.name = val;
+				if (kq.areaData[key]) {
+					childMap = _handleAreaNode(key);
+				}
+				tempMap.children = childMap;
+				rMap.push(tempMap);
+			})
+		} else {
+			rMap = '^_kq_nodata_$';
+		}
+		return rMap;
+	}
+	code = kq.getCurrAreaCode();
+	code && (nodeName = _getAreaName(code, cacheLevel));
+	if (code == null || nodeName == '^_kq_error_$') {
+		cacheLevel = 'province';
+		code = kq.areaData.province[0].code;
+		nodeName = kq.areaData.province[0].address;
+	}
+	rData = [{ id: code, level: 1, name: nodeName, text: nodeName }];
+
+	if (cacheLevel != 'area') {
+		var child = _handleAreaNode(code);
+		child != '^_kq_nodata_$' && (rData[0].children = child);
+	}
+	return rData;
+}
+/** ############################################################################################################# */
+/** ##################################################### 地区选择器： city-piker ############################################################ */
+/** ############################################################################################################# */
+/** 地址区号 -- 初始化 */
+kq.initDefaultDZQH = function (id) {
+	kq.ajax(kq.getPositionUrl, {CSMC:"position"}, function (data) {
+		if (data.xtcsResult) {
+			var as = data.xtcsResult.CSGZ.split("/");
+			$('#' + id).citypicker({
+				province: as[0]
+				, city: as[1]
+				, district: as[2]
+			});
+			kq.setDefaultDZQH(id, data.xtcsResult.CSGZ)
+		}else{
+			$('#' + id).citypicker({
+				province: "北京市"
+				, city: "北京市"
+				, district: "朝阳区"
+			});
+			kq.setDefaultDZQH(id, "北京市/北京市/朝阳区")
+		}
+	})
+	
+}
+
+/** 地址区号 -- 设置指定值 */
+kq.setDefaultDZQH = function (id, sjqh) {
+	$("#" + id).val(sjqh).citypicker();
+}
+
+/** 地址区号 -- 获取地址值 */
+kq.getDZQHVal = function (id) {
+	return $("#" + id).data('citypicker').getVal();
+}
+/** ############################################################################################################# */
+/** ##################################################### 身份验证############################################################ */
+/** ############################################################################################################# */
+kq.identity = function (url) {
+	var bz = false;
+	var userInfor = kq.getCurrentUser().USER_INFO;
+	var ztid = userInfor.USER_ID;
+    var cardId = userInfor.ZJHM;
+    var cardName = userInfor.USER_NAME;
+    var bizToken = kq.getUrlParam('BizToken');
+    if (!kq.assert.isEmpty(bizToken)) {
+    	kq.ajax_url(kqwx.model.getDetectInfoUrl, {BizToken: bizToken}, function(data){
+    		bz = true;
+    		var flag = data.data;
+    	})
+    }
+    var usInfo = kq.getUserInfoByOpenId(userInfor.OPENID);
+    var isAut = kq.isAuthentication(url);
+    url = common.context + '/' + url;
+    if(usInfo && usInfo.ISVERIFICATION != '1' && isAut){//未验证需要验证
+    	if (bz) {
+			kq.ajax(kqwx.model.updateAuthenticationStatus, {Condition: JSON2.stringify({ZJHM : cardId, ZTID: ztid})}, function(data){
+				if (data.result > 0) {
+					
+				}
+			})
+		}
+    	kq.ajax_url(kq.path.common + "/identityVerification/wxview/authentication/detectAuth.do", {ZJHM : cardId, URL: url}, function(data){
+    		var data = data.data;
+			if (!$.isEmptyObject(data)) {
+				 layer.open({
+					 closeBtn: 0
+					 ,area: '76%'
+					 ,content: '按照规定，需要进行个人身份信息验证！'
+	                 , btn: ['确定', '取消']
+	                 , yes: function (index, layero) {
+	                		window.location.href= data.Url;
+	                 }
+	                 , btn2: function () {
+	                	window.location.href = kq.path.base+ 'common/mobile/wemenu/wemain.html';
+	                 }
+	             });
+			} else {
+				window.location.href = kq.path.base+ 'common/mobile/wemenu/wemain.html';
+			}
+    	})
+	}
+}
+
+/** ############################################################################################################# */
+/** #############################身份验证,上传人像照片和证件对比是否同一人################################################## */
+/** ############################################################################################################# */
+kq.fun_faceVft = function (IdCard ,Name ,ImageBase64 ) {
+	var result;
+    kq.ajax_url(kq.path.common + "/identityVerification/wxview/authentication/faceVerification.do", 
+    		{
+	    		zjhm : IdCard, 
+	    		name: Name,
+				imgbase:ImageBase64
+    		}, function(data){
+    			result = data.data;
+    })
+    return result;
+}
+
+/**根据openid获取主体信息*/
+kq.getUserInfoByOpenId = function (openid) {
+	kq.ajax(kqwx.model.getUserInfoByOpenIdUrl, {Condtion: JSON2.stringify({openid : openid})}, function(data){
+		if (!kq.assert.isEmpty(data.ztxx)) {
+			kq.userInfor = data.ztxx;
+		}
+	})
+	return kq.userInfor;
+}
+
+
+/**URL是否需要身份验证*/
+kq.isAuthentication = function (url) {
+	var isAuth = false;
+	kq.ajax(kqwx.model.getIsAuthenticationUrl, {Condition: JSON2.stringify({URL : url})}, function(data){
+		if (data.rows.length > 0) {
+			isAuth = data.rows[0].ISAUTH == 1 ? true:false;
+		}
+    })
+    return isAuth;
+}
+
+kq.linkage = function(pck, rawData) {
+	  "use strict";
+	  var me = this;
+	  
+	  var wrap = $(pck);
+
+	  var defaults;
+	  var raw = rawData;
+
+	  this.format = function(data) {
+	    var result = [];
+	    for(var i=0;i<data.length;i++) {
+	      var d = data[i];
+	      if(/^请选择|市辖区/.test(d.name)) continue;
+	      result.push(d);
+	    }
+	    if(result.length) return result;
+	    return [];
+	  };
+
+	  this.sub = function(data) {
+	    if(!data.sub) return [{ name: '', code: data.code }];  // 有可能某些县级市没有区
+	    return me.format(data.sub);
+	  };
+
+	  this.getSecondary = function(d) {
+	    for(var i=0;i< raw.length;i++) {
+	      if(raw[i].code === d || raw[i].name === d) return me.sub(raw[i]);
+	    }
+	    return [];
+	  };
+
+	  this.getThirdlevel = function(p, c) {
+	    for(var i=0;i< raw.length;i++) {
+	      if(raw[i].code === p || raw[i].name === p) {
+	        for(var j=0;j< raw[i].sub.length;j++) {
+	          if(raw[i].sub[j].code === c || raw[i].sub[j].name === c) {
+	            return me.sub(raw[i].sub[j]);
+	          }
+	        }
+	      }
+	    }
+	  };
+
+	  this.parseInitValue = function (val) {
+	    var p = raw[0], c, d;
+	    var tokens = val.split(' ');
+	    raw.map(function (t) {
+	      if (t.name === tokens[0]) p = t;
+	    });
+
+	    p.sub.map(function (t) {
+	      if (t.name === tokens[1]) c = t;
+	    })
+
+	    if (tokens[2]) {
+	      c.sub.map(function (t) {
+	        if (t.name === tokens[2]) d = t;
+	      })
+	    }
+
+	    if (d) return [p.code, c.code, d.code];
+	    return [p.code, c.code];
+	  }
+
+	  this.picker = function(params) {
+	    params = $.extend({}, defaults, params);
+	    return wrap.each(function() {
+	      var self = this;
+	      
+	      var firstlevelName = raw.map(function(d) {
+	        return d.name;
+	      });
+	      var firstlevelCode = raw.map(function(d) {
+	        return d.code;
+	      });
+	      var initSecondary = me.sub(raw[0]);
+	      var initSecondaryName = initSecondary.map(function (c) {
+	        return c.name;
+	      });
+	      var initSecondaryCode = initSecondary.map(function (c) {
+	        return c.code;
+	      });
+	      var initThirdlevel = me.sub(raw[0].sub[0]);
+
+	      var initThirdlevelName = initThirdlevel.map(function (c) {
+	        return c.name;
+	      });
+	      var initThirdlevelCode = initThirdlevel.map(function (c) {
+	        return c.code;
+	      });
+
+	      var currentFirstlevel = firstlevelName[0];
+	      var currentSecondary = initSecondaryName[0];
+	      var currentThirdlevel = initThirdlevelName[0];
+
+	      var cols = [
+	          {
+	            displayValues: firstlevelName,
+	            values: firstlevelCode,
+	            cssClass: "col-province"
+	          },
+	          {
+	            displayValues: initSecondaryName,
+	            values: initSecondaryCode,
+	            cssClass: "col-city"
+	          }
+	        ];
+
+	        if(params.showThirdlevel) cols.push({
+	          values: initThirdlevelCode,
+	          displayValues: initThirdlevelName,
+	          cssClass: "col-district"
+	        });
+
+	      var config = {
+
+	        cssClass: "city-picker",
+	        rotateEffect: false,  //为了性能
+	        formatValue: function (p, values, displayValues) {
+	          return displayValues.join(' ');
+	        },
+	        onChange: function (picker, values, displayValues) {
+	          var newProvince = picker.cols[0].displayValue;
+	          var newCity;
+	          if(newProvince !== currentFirstlevel) {
+	            var newSecondary = me.getSecondary(newProvince);
+	            newCity = newSecondary[0].name;
+	            var newThirdlevel = me.getThirdlevel(newProvince, newCity);
+	            picker.cols[1].replaceValues(newSecondary.map(function (c) {
+	              return c.code;
+	            }), newSecondary.map(function (c) {
+	              return c.name;
+	            }));
+	            if(params.showThirdlevel) picker.cols[2].replaceValues(newThirdlevel.map(function (d) {
+	              return d.code;
+	            }), newThirdlevel.map(function (d) {
+	              return d.name;
+	            }));
+	            currentFirstlevel = newProvince;
+	            currentSecondary = newCity;
+	            picker.updateValue();
+	            return false; // 因为数据未更新完，所以这里不进行后序的值的处理
+	          } else {
+	            if(params.showThirdlevel) {
+	              newCity = picker.cols[1].displayValue;
+	              if(newCity !== currentSecondary) {
+	                var Thirdlevel = me.getThirdlevel(newProvince, newCity);
+	                picker.cols[2].replaceValues(Thirdlevel.map(function (d) {
+	                  return d.code;
+	                }), Thirdlevel.map(function (d) {
+	                  return d.name;
+	                }));
+	                currentSecondary = newCity;
+	                picker.updateValue();
+	                return false; // 因为数据未更新完，所以这里不进行后序的值的处理
+	              }
+	            }
+	          }
+	          //如果最后一列是空的，那么取倒数第二列
+	          var len = (values[values.length-1] ? values.length - 1 : values.length - 2)
+	          $(self).attr('data-code', values[len]);
+	          $(self).attr('data-codes', values.join(','));
+	          if (params.onChange) {
+	            params.onChange.call(self, picker, values, displayValues);
+	          }
+	        },
+
+	        cols: cols
+	      };
+
+	      if(!this) return;
+	      var p = $.extend({}, params, config);
+	      //计算value
+	      var val = $(this).val();
+	      val = val || p.defaultVal;
+		  currentFirstlevel = !val ? raw[0].name : val.split(" ")[0];
+	      currentSecondary = !val ? me.sub(raw[0])[0].name : val.split(" ")[1];
+	      currentThirdlevel= !val ? me.sub(raw[0].sub[0])[0].name : val.split(" ")[2];
+		  
+	      if(val) {
+	        p.value = me.parseInitValue(val);
+	        if(p.value[0]) {
+	          var Secondary = me.getSecondary(p.value[0]);
+	          p.cols[1].values = Secondary.map(function (c) {
+	            return c.code;
+	          });
+	          p.cols[1].displayValues = Secondary.map(function (c) {
+	            return c.name;
+	          });
+	        }
+
+	        if(p.value[1]) {
+	          if (params.showThirdlevel) {
+	            var dis = me.getThirdlevel(p.value[0], p.value[1]);
+	            p.cols[2].values = dis.map(function (d) {
+	              return d.code;
+	            });
+	            p.cols[2].displayValues = dis.map(function (d) {
+	              return d.name;
+	            });
+	          }
+	        } else {
+	          if (params.showThirdlevel) {
+	            var dis = me.getThirdlevel(p.value[0], p.cols[1].values[0]);
+	            p.cols[2].values = dis.map(function (d) {
+	              return d.code;
+	            });
+	            p.cols[2].displayValues = dis.map(function (d) {
+	              return d.name;
+	            });
+	          }
+	        }
+	      }
+	      $(this).picker(p);
+	    });
+	  };
+
+	  defaults = this.picker.prototype.defaults = {
+	    showThirdlevel: true //是否显示地区选择
+	  };
+
+};
+
+/**
+ * 字节转'B', 'KB', 'MB', 'GB'
+ */
+kqwx.bytesToSize = function (bytes){
+	 var size = "";
+	    if(bytes < 0.1 * 1024){                            //小于0.1KB，则转化成B
+	        size = bytes.toFixed(2) + "B"
+	    }else if(bytes < 0.1 * 1024 * 1024){            //小于0.1MB，则转化成KB
+	        size = (bytes/1024).toFixed(2) + "KB"
+	    }else if(bytes < 0.1 * 1024 * 1024 * 1024){        //小于0.1GB，则转化成MB
+	        size = (bytes/(1024 * 1024)).toFixed(2) + "MB"
+	    }else{                                            //其他转化成GB
+	        size = (bytes/(1024 * 1024 * 1024)).toFixed(2) + "GB"
+	    }
+
+	    var sizeStr = size + "";                        //转成字符串
+	    var index = sizeStr.indexOf(".");                    //获取小数点处的索引
+	    var dou = sizeStr.substr(index + 1 ,2)            //获取小数点后两位的值
+	    if(dou == "00"){                                //判断后两位是否为00，如果是则删除00                
+	        return sizeStr.substring(0, index) + sizeStr.substr(index + 3, 2)
+	    }
+	    return size;
+}
+
+/**
+ * 操作日志
+ */
+kqwx.saveCZRZ = function(logData){
+	 kq.ajax("COMMON_CMS_SAVE_CZRZ", { logModel: JSON2.stringify(logData)}); 
+}

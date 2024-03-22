@@ -1,0 +1,14 @@
+
+$.ajaxSetup({
+    beforeSend: function () {
+        if (this.data instanceof FormData) {
+            this.data.append('pageType', 'wxview');
+        } else {
+            this.data = this.data || {};
+            this.data.pageType = "wxview";
+            this.data = $.param(this.data);
+        }
+    },
+    processData: false,
+    error: kq._defaultErrorFunc // 该函数位于kq.js中
+});

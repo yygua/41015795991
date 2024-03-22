@@ -1,0 +1,498 @@
+/* ☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲「 Model参数设置层 」☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲ */
+var showModel = {
+	getParcelArrayUrl : kq.path.common + "wxview/complex/searchParcelMap.do",// 宗地图
+	getHouseholdArrayUrl : kq.path.common + "wxview/complex/searchHouseholdMap.do",// 户图
+	getThreedimenArrayUrl : kq.path.common + "wxview/complex/searchThreedimenMap.do",// 三维图
+	getBdcInfoUrl : kq.path.common + "wxview/complex/searchBdcInfo.do",// 不动产信息
+	getBdczzInfoUrl : kq.path.common + "wxview/complex/queryDzzzxx.do",// 照面信息
+	getRsaFwidUrl : kq.path.common + "wxview/complex/rsaDecrypt.do",// 参数加密
+	getAreaCodeUrl : kq.path.common + "wxview/complex/getAreaCode.do",//市县合库处理fwid
+	isExistParcel : false,
+	isExistHousehold : false,
+	isExistThreedimen : false,
+	wxsmcsIfDecrypt : kq.GETXTCS({
+		CSMC : "wxsmcsIfDecrypt"}) ? kq.GETXTCS({CSMC : "wxsmcsIfDecrypt"}).CSGZ : 0,// 参数是否需解密
+	wxsmshowswt : kq.GETXTCS({CSMC : "wxsmshowswt"}) ? kq.GETXTCS({CSMC : "wxsmshowswt"}).CSGZ : 0,// 是否显示三维图
+	showbdcinfo : kq.GETXTCS({CSMC : "showbdcinfo"}) ? kq.GETXTCS({CSMC : "showbdcinfo"}).CSGZ : 0,// 是否显示宗地分户图下的不动产限制信息
+	wxsmqxhk : kq.GETXTCS({CSMC : "wxsmqxhk"}) ? kq.GETXTCS({CSMC : "wxsmqxhk"}).CSGZ : 0,// 区县是否合库		
+	city : kq.GETXTCS({CSMC : "city"}),
+	slid : kq.getUrlParam("slid"),
+	qxdm : kq.getUrlParam("qxdm"),
+	fwid : kq.getUrlParam("fwid").replace("\'", "").replace("\'", "").replace(/\*ca\*/g, ',')
+}
+/*
+ * ☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲「 获取宗地图分层分户图base64☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲☲
+ */
+var imageBase64 = {
+	/* RsaFwid: function () {
+    	kq.ajax_url(showModel.getRsaFwidUrl, {fwid: kq.getUrlParam("fwid")}, function (result) {
+    		if (result.data) {
+    			if (result.data.parame != "") {
+    				showModel.fwid = result.data.parame;
+	            } else {
+	                showModel.fwid = kq.getUrlParam("fwid");
+	            }
+	        } else {
+	            kq.dialog.alert(result.data.msg);
+	            return;
+	        }
+	   })
+    },*/
+	BdcInfo : function() {
+		if (!kq.assert.isEmpty(showModel.showbdcinfo) && showModel.showbdcinfo == "1") {
+			var fwid = showModel.fwid;
+			var qxdm = showModel.qxdm;
+			var slid = showModel.slid;
+			var callback = function(data) {
+				if (data.data) {
+					showModel.bdcxx = data.data;
+					showModel.isExistHousehold = true;
+				}
+			}
+			kq.ajax_url(showModel.getBdcInfoUrl, {
+				fwid : fwid,
+				qxdm : qxdm,
+				slid : slid,
+				ifdecrypt : showModel.wxsmcsIfDecrypt
+			}, callback);
+			return showModel.bdcxx;
+		}
+	},
+	ParcelMap : function() {
+		var fwid = showModel.fwid;
+		var qxdm = showModel.qxdm;
+		var callback = function(data) {
+			if (data.data) {
+				if (data.data.bz) {
+					showModel.btrt = data.data.rows;
+					showModel.isExistParcel = true;
+				}
+			}
+		}
+		kq.ajax_url(showModel.getParcelArrayUrl, {
+			fwid : fwid,
+			qxdm : qxdm,
+			ifdecrypt : showModel.wxsmcsIfDecrypt
+		}, callback);
+		return showModel.btrt;
+	},
+	HouseholdMap : function() {
+		var fwid = showModel.fwid;
+		var qxdm = showModel.qxdm;
+
+		var callback = function(data) {
+			// 关闭加载提示
+			if (data.data) {
+				if (data.data.bz) {
+					showModel.htrt = data.data.rows;
+					showModel.isExistHousehold = true;
+				}
+			}
+		}
+		kq.ajax_url(showModel.getHouseholdArrayUrl, {
+			fwid : fwid,
+			qxdm : qxdm,
+			ifdecrypt : showModel.wxsmcsIfDecrypt
+		}, callback);
+		return showModel.htrt;
+	},
+	threedimenMap : function() {
+		var fwid = showModel.fwid;
+		var qxdm = showModel.qxdm;
+		if (!kq.assert.isEmpty(showModel.wxsmshowswt) && showModel.wxsmshowswt == "1") {
+			var callback = function(data) {
+				// 关闭加载提示
+				// weui.loading('loading').hide();
+				if (data.data) {
+					if (data.data.bz) {
+						showModel.swt = data.data.rows;
+						showModel.isExistThreedimen = true;
+					}
+				}
+			}
+			kq.ajax_url(showModel.getThreedimenArrayUrl, {
+				fwid : fwid,
+				qxdm : qxdm,
+				ifdecrypt : showModel.wxsmcsIfDecrypt
+			}, callback);
+			return showModel.swt;
+		}
+	},
+	BdczzInfo : function() {
+		var bdcqzh = decodeURI(escape(decodeURI(kq.getUrlParam('bdcqzh'))));
+		var patrn = /[\u4E00-\u9FA5]|[\uFE30-\uFFA0]/gi;
+		if (!patrn.exec(bdcqzh)) {
+			bdcqzh = kq.getUrlParam('bdcqzh');
+		}
+		var qxdm = showModel.qxdm;
+		if (bdcqzh) {
+			var callback = function(data) {
+				// 关闭加载提示
+				if (data.data) {
+					showModel.zzInfo = data.data;
+					showModel.isExistHousehold = true;
+				}
+			}
+			kq.ajax_url(showModel.getBdczzInfoUrl, {
+				bdcqzh : bdcqzh,
+				qxdm : qxdm,
+				ifdecrypt : showModel.wxsmcsIfDecrypt
+			}, callback);
+			return showModel.zzInfo;
+		}
+	}
+}
+
+//市县合库，区分FWID
+var setCombinedLibraryByFwid = function(){
+	var fw = showModel.fwid;
+	if(showModel.qxdm != null && showModel.qxdm != '' && showModel.qxdm != undefined && showModel.wxsmqxhk == 1){
+		var callback = function(data) {
+			if (data.data) {
+				showModel.fwid = data.data;
+			}
+		}
+		kq.ajax_url(showModel.getAreaCodeUrl, {fwid:fw,qxdm:showModel.qxdm,ifdecrypt:showModel.wxsmcsIfDecrypt}, callback);
+	}
+}
+
+var initPhotoSwipeFromDOM = function(gallerySelector) {
+	var html = "";
+	if (!kq.getUrlParam("bdcqzh")) {
+		html = "<li class='layui-this'>宗地分户图</li>";
+		$('.layui-tab-title').append(html);
+		$('#dv_zdfht').addClass("layui-tab-item layui-show");
+	} else {
+		html = "<li class='layui-this'>照面信息</li><li id ='li_zdfht'>宗地分户图</li>";
+		$('.layui-tab-title').append(html);
+		$('#dv_zzInfo').addClass("layui-tab-item layui-show");
+	}
+
+	if (showModel.wxsmshowswt == "0") {
+		$('#threedimen').hide();
+	}
+	// 解析来自DOM元素幻灯片数据（URL，标题，大小...）
+	// (children of gallerySelector)
+	var parseThumbnailElements = function(el) {
+		var thumbElements = el.childNodes, numNodes = thumbElements.length, items = [], figureEl, linkEl, size, item, divEl;
+		for (var i = 0; i < numNodes; i++) {
+			figureEl = thumbElements[i]; // <figure> element
+			// 仅包括元素节点
+			if (figureEl.nodeType !== 1) {
+				continue;
+			}
+			divEl = figureEl.children[0];
+			linkEl = divEl.children[0]; // <a> element
+			var realWidth;// 真实的宽度
+			var realHeight;// 真实的高度
+			var imgs = new Image();
+			imgs.src = $(linkEl).find("img")[0].src;
+			realWidth = imgs.width;
+			realHeight = imgs.height;
+			size = [ realWidth, realHeight ];
+			// 创建幻灯片对象
+			item = {
+				src : linkEl.getAttribute('href'),
+				w : parseInt(size[0], 10),
+				h : parseInt(size[1], 10)
+			};
+			if (figureEl.children.length > 1) {
+				// <figcaption> content
+				item.title = figureEl.children[1].innerHTML;
+			}
+			if (linkEl.children.length > 0) {
+				// <img> 缩略图节点, 检索缩略图网址
+				item.msrc = linkEl.children[0].getAttribute('src');
+			}
+			item.el = figureEl; // 保存链接元素 for
+			items.push(item);
+		}
+		return items;
+	};
+	// 查找最近的父节点
+	var closest = function closest(el, fn) {
+		return el && (fn(el) ? el : closest(el.parentNode, fn));
+	};
+	// 当用户点击缩略图触发
+	var onThumbnailsClick = function(e) {
+		e = e || window.event;
+		e.preventDefault ? e.preventDefault() : e.returnValue = false;
+		var eTarget = e.target || e.srcElement;
+		// find root element of slide
+		var clickedListItem = closest(eTarget, function(el) {
+			return (el.tagName && el.tagName.toUpperCase() === 'FIGURE');
+		});
+		if (!clickedListItem) {
+			return;
+		}
+		var clickedGallery = clickedListItem.parentNode, childNodes = clickedListItem.parentNode.childNodes, numChildNodes = childNodes.length, nodeIndex = 0, index;
+
+		for (var i = 0; i < numChildNodes; i++) {
+			if (childNodes[i].nodeType !== 1) {
+				continue;
+			}
+			if (childNodes[i] === clickedListItem) {
+				index = nodeIndex;
+				break;
+			}
+			nodeIndex++;
+		}
+		if (index >= 0) {
+			openPhotoSwipe(index, clickedGallery);
+		}
+		return false;
+	};
+	// parse picture index and gallery index from URL (#&pid=1&gid=2)
+	var photoswipeParseHash = function() {
+		var hash = window.location.hash.substring(1), params = {};
+		if (hash.length < 5) {
+			return params;
+		}
+		var vars = hash.split('&');
+		for (var i = 0; i < vars.length; i++) {
+			if (!vars[i]) {
+				continue;
+			}
+			var pair = vars[i].split('=');
+			if (pair.length < 2) {
+				continue;
+			}
+			params[pair[0]] = pair[1];
+		}
+		if (params.gid) {
+			params.gid = parseInt(params.gid, 10);
+		}
+		return params;
+	};
+
+	var openPhotoSwipe = function(index, galleryElement, disableAnimation, fromURL) {
+		var pswpElement = document.querySelectorAll('.pswp')[0], gallery, options, items;
+		items = parseThumbnailElements(galleryElement);
+		// 这里可以定义参数
+		options = {
+			barsSize : {
+				top : 100,
+				bottom : 100
+			},
+			fullscreenEl : false,
+			shareButtons : [ {
+				id : 'download',
+				label : '保存图片',
+				url : '{{raw_image_url}}',
+				download : true
+			} ],
+			galleryUID : galleryElement.getAttribute('data-pswp-uid'),
+			getThumbBoundsFn : function(index) {
+				var thumbnail = items[index].el.getElementsByTagName('img')[0], // find
+				pageYScroll = window.pageYOffset || document.documentElement.scrollTop, rect = thumbnail.getBoundingClientRect();
+				return {
+					x : rect.left,
+					y : rect.top + pageYScroll,
+					w : rect.width
+				};
+			},
+			 isClickableElement : function(el){///////长按保存
+		          return true;
+		        }
+		};
+		if (fromURL) {
+			if (options.galleryPIDs) {
+				// parse real index when custom PIDs are used
+				for (var j = 0; j < items.length; j++) {
+					if (items[j].pid == index) {
+						options.index = j;
+						break;
+					}
+				}
+			} else {
+				options.index = parseInt(index, 10) - 1;
+			}
+		} else {
+			options.index = parseInt(index, 10);
+		}
+		if (isNaN(options.index)) {
+			return;
+		}
+		if (disableAnimation) {
+			options.showAnimationDuration = 0;
+		}
+		gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, options);
+		gallery.init();
+	};
+	var zdtsmdl = kq.GETXTCS({
+		CSMC : "zdtsmdl"
+	}).CSGZ;
+	if (zdtsmdl == 1) {
+		window.location.href = kq.path.common + "mobile/login.html";
+	}
+	
+	// 市县合库处理,设置FWID
+	setCombinedLibraryByFwid();
+	
+	// 不动产限制信息
+	if (!kq.assert.isEmpty(showModel.showbdcinfo) && showModel.showbdcinfo == "1") {
+		var BdcInfoByDiv = imageBase64.BdcInfo();
+		if (BdcInfoByDiv.xscount == 0) {
+			kq.dialog.alert("未查询到有效信息！",function(){
+				layer.closeAll();
+			});
+			return;
+		}
+		var bdcqzhHtml = '<div>' + BdcInfoByDiv.bdcqzh + '</div>'
+		$('#div_bdcqzh').find('.my-gallery').html(bdcqzhHtml);
+
+		var bdcInfoHtml = '<div>';
+			bdcInfoHtml += '<li class="li">证书状态：';
+			bdcInfoHtml += BdcInfoByDiv.cqcount == 0 ? '无效' : '有效';
+			bdcInfoHtml += '</li>';
+			bdcInfoHtml += '<li class="li">抵押状态：';
+			bdcInfoHtml += BdcInfoByDiv.ydcount == 0 ? BdcInfoByDiv.dycount == 0 ? '无抵押' : '有抵押' : '有预抵';
+			bdcInfoHtml += '</li>';
+		var fwid = showModel.fwid.split(',');
+		if (BdcInfoByDiv.dycount >= 1 && fwid.length == 1) {
+			var dyqr = BdcInfoByDiv.dyqr.split(',');
+			var dyqx = BdcInfoByDiv.dyqx.split(',');
+			bdcInfoHtml += '<li class="li">抵押权人：' + dyqr[0] + '</li>';
+			var dyqrHtml = '<li class="li-none">', dyqxHtml = '<li class="li-none">';
+			for (var i = 1; i < dyqr.length; i++) {
+				dyqrHtml += dyqr[i] + '<br/>';
+				dyqxHtml += dyqx[i] + '<br/>';
+			}
+			dyqrHtml += '</li>';
+			dyqxHtml += '</li>';
+			bdcInfoHtml += dyqrHtml;
+			bdcInfoHtml += '<li class="li">抵押期限：' + dyqx[0] + '</li>';
+			bdcInfoHtml += dyqxHtml;
+		}
+		bdcInfoHtml += '<li class="li">查封状态：';
+		bdcInfoHtml += BdcInfoByDiv.cfcount == 0 ? '无查封' : '有查封';
+		bdcInfoHtml += '</li>';
+		if (BdcInfoByDiv.cfcount >= 1 && fwid.length == 1) {
+			var cfjg = BdcInfoByDiv.cfjg.split(',');
+			bdcInfoHtml += '<li class="li">查封机关：' + cfjg[0] + '</li>';
+			var cfjgHtml = '<li class="li-none">'
+			for (var i = 1; i < cfjg.length; i++) {
+				cfjgHtml += cfjg[i] + '<br/>';
+			}
+			cfjgHtml += '</li>';
+			bdcInfoHtml += cfjgHtml;
+		}
+		bdcInfoHtml += '<li class="li">异议状态：';
+			bdcInfoHtml += BdcInfoByDiv.yycount == 0 ? '无异议' : '有异议';
+		bdcInfoHtml += '</li>';
+		bdcInfoHtml += '</div>';
+		$('#bdcstate').find('.my-gallery').append(bdcInfoHtml);
+	} else {
+		$('#div_bdcqzh').hide();
+		$('#bdcstate').hide();
+	}
+	// 照面信息
+	if (kq.getUrlParam("bdcqzh")) {
+		var bdczzInfo = imageBase64.BdczzInfo();
+		if (bdczzInfo) {
+			bdczzInfo.mj = bdczzInfo.mj + '㎡';
+			bdczzInfo.mj1 = bdczzInfo.mj1 + '㎡';
+			bdczzInfo.qt = bdczzInfo.qt.replace(/\*ca\*/g, ',').replace(/\*rn\*/g, ';');
+			if (bdczzInfo.zslb == "不动产证明") {
+				$('#zm').remove();
+			} else {
+				$('#dv_ywr').remove();
+				$('#dv_zmqlhsx').remove();
+			}
+			kq.bdjz.bdsetval("Model", bdczzInfo);
+		}
+	}
+
+	var HouseholdBase64Arr = imageBase64.HouseholdMap();
+	var parcelBase64Arr = imageBase64.ParcelMap();
+	var threedimenBase64Arr = imageBase64.threedimenMap();
+
+	if (HouseholdBase64Arr == undefined && parcelBase64Arr == undefined) {
+		kq.dialog.alert("查无宗地分户图信息",function(){
+			layer.closeAll();
+		});
+		return;
+	}
+	layer.closeAll();
+	// 分户图
+	var htmlArr = [];
+	if (HouseholdBase64Arr != undefined) {
+		$.each(HouseholdBase64Arr, function(index, item) {
+			var templateHtml = '';
+			templateHtml = '<figure>' + '<div id="fig_h" style="height:99px;width:99px;">' + '<a href="data:image/png;base64,' + item.baseStr
+					+ '"><img style="height: 100%;" src="data:image/png;base64,' + item.baseStr + '"></a>' + '</div>' + '</figure>';
+			htmlArr.push(templateHtml);
+		})
+		var htmlStr = htmlArr.join('');
+		$('#household').find('.my-gallery').html(htmlStr);
+	} else {
+		kq.dialog.alert("查无分户图信息",function(){
+			layer.closeAll();
+		});
+	}
+
+	// 宗地图
+	var htmlArr1 = [];
+	if (parcelBase64Arr != undefined) {
+		$.each(parcelBase64Arr, function(ind, obj) {
+			var templateHtml1 = '';
+			templateHtml1 = '<figure>' + '<div id="fig_zd" style="height:99px;width:99px;">' + '<a href="data:image/png;base64,' + obj.baseStr
+					+ '"><img style="height: 100%;" src="data:image/png;base64,' + obj.baseStr + '"></a>' + '</div>' + '</figure>';
+			htmlArr1.push(templateHtml1);
+		})
+		var htmlStr1 = htmlArr1.join('');
+		$('#parcel').find('.my-gallery').append(htmlStr1);
+	} else {
+		kq.dialog.alert("查无宗地图信息",function(){
+			layer.closeAll();
+		});
+	}
+
+	// 三维图
+	var htmlArr2 = [];
+	if (!kq.assert.isEmpty(showModel.wxsmshowswt) && showModel.wxsmshowswt == "1") {
+		if (threedimenBase64Arr != undefined) {
+			$.each(threedimenBase64Arr, function(ind, obj) {
+				var templateHtml2 = '';
+				templateHtml2 = '<figure>' + '<div id="fig_swt" style="height:99px;width:99px;">' + '<a href="data:image/png;base64,' + obj.baseStr
+						+ '"><img style="height: 100%;" src="data:image/png;base64,' + obj.baseStr + '"></a>' + '</div>' + '</figure>';
+				htmlArr2.push(templateHtml2);
+			})
+			var htmlStr2 = htmlArr2.join('');
+			$('#threedimen').find('.my-gallery').append(htmlStr2);
+		} else {
+			kq.dialog.alert("查无三维图信息",function(){
+				layer.closeAll();
+			});
+		}
+	} else {
+		$('#threedimen').hide();
+	}
+	var galleryElements = document.querySelectorAll(gallerySelector);
+	for (var i = 0, l = galleryElements.length; i < l; i++) {
+		galleryElements[i].setAttribute('data-pswp-uid', i + 1);
+		galleryElements[i].onclick = onThumbnailsClick;
+	}
+	var hashData = photoswipeParseHash();
+	if (hashData.pid && hashData.gid) {
+		openPhotoSwipe(hashData.pid, galleryElements[hashData.gid - 1], true, true);
+	}
+};
+
+$(function() {
+
+	$('.weui-tabbar').remove();
+	layer.load(1);
+	layui.use('element', function() {
+		var element = layui.element;
+		element.on('tab(docDemoTabBrief)', function(data) {
+			if (data.index == 1) {
+				$(".my-gallery>figure>div").each(function() {
+					$(this).height($(this).width());
+				});
+			}
+		});
+		initPhotoSwipeFromDOM('.my-gallery');
+	});
+
+})

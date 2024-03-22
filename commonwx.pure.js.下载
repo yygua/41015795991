@@ -1,0 +1,35 @@
+var baseUrl;
+if (typeof window.location.origin === "undefined"){
+	baseUrl = window.location.protocol + "//" + window.location.host;
+}else{
+    baseUrl = window.location.origin;
+}
+var common = { 
+		context:baseUrl,
+		pathname : window.location.pathname,
+		pathNum : window.location.pathname.split('\/').length
+};
+common.context += common.pathname.indexOf('bigplatform-shell') !== -1 ? '/' + common.pathname.split("/")[1] : '';
+/**纯基本工具版*/
+/*自定义图标*/
+JSLoader.loadStyleSheet(common.context + "/custom-icon-fonts/style.css");
+/*bootstrap*/
+JSLoader.loadStyleSheet(common.context + "/js/bootstrap/css/bootstrap.min.css");
+/*Jquery*/
+JSLoader.loadJavaScript(common.context + "/js/jquery/jquery-3.3.1.min.js");
+JSLoader.loadJavaScript(common.context + "/js/jquery/jquery.i18n.properties-1.0.9.js");
+/*基本工具*/
+JSLoader.loadJavaScript(common.context + "/js/json2.js");
+JSLoader.loadJavaScript(common.context + "/js/hashMap.js");
+JSLoader.loadJavaScript(common.context + "/js/view/jweixin-1.2.0.js");
+//地区选择器
+JSLoader.loadStyleSheet(common.context + "/js/cityPicker/css/city-picker.css");
+JSLoader.loadJavaScript(common.context + "/js/cityPicker/js/city-picker.data.en.min.js");
+JSLoader.loadJavaScript(common.context + "/js/cityPicker/js/city-picker.data.min.js");
+JSLoader.loadJavaScript(common.context + "/js/cityPicker/js/city-picker.min.js"); 
+/*kanq工具集*/
+JSLoader.loadJavaScript(common.context + "/js/kq.js");
+JSLoader.loadJavaScript(common.context + "/js/kq.constants.js");
+JSLoader.loadJavaScript(common.context + "/js/kqwx.js");
+JSLoader.loadJavaScript(common.context + "/js/kqWXViewConfig.js");
+
